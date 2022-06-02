@@ -1,0 +1,2685 @@
+Nonterminals useless in grammar
+
+    Member_Access
+    Assignment
+    Method_Call
+    if_else
+    while
+    do_while
+    print
+
+
+Terminals unused in grammar
+
+    FLOAT
+    FLOAT_VAL
+
+
+State 25 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: Start $end
+
+    1 Start: Program
+
+    2 Program: Classes
+
+    3 Classes: Classes Class
+    4        | Class
+
+    5 Class: Name EXTENDS Name LEFT_BRACE Members Methods RIGHT_BRACE
+    6      | Name EXTENDS Name LEFT_BRACE Methods RIGHT_BRACE
+    7      | Name EXTENDS Name LEFT_BRACE Members RIGHT_BRACE
+    8      | Name EXTENDS Name LEFT_BRACE RIGHT_BRACE
+    9      | Name LEFT_BRACE Members Methods RIGHT_BRACE
+   10      | Name LEFT_BRACE Members RIGHT_BRACE
+   11      | Name LEFT_BRACE Methods RIGHT_BRACE
+   12      | Name LEFT_BRACE RIGHT_BRACE
+
+   13 Members: Members Member
+   14        | Member
+
+   15 Member: Type Names SEMICOLON
+
+   16 Name: NAME
+
+   17 Type: INT
+   18     | BOOL
+   19     | Name
+   20     | NONE
+
+   21 Methods: Methods Method
+   22        | Method
+
+   23 Method: Name LEFT_PAREN Parameters RIGHT_PAREN ARROW Type MethodBody
+   24       | Name LEFT_PAREN Parameters RIGHT_PAREN MethodBody
+   25       | Name LEFT_PAREN RIGHT_PAREN ARROW Type MethodBody
+   26       | Name LEFT_PAREN RIGHT_PAREN MethodBody
+
+   27 MethodBody: LEFT_BRACE Declarations Statements Return RIGHT_BRACE
+   28           | LEFT_BRACE Declarations Return RIGHT_BRACE
+   29           | LEFT_BRACE Declarations Statements RIGHT_BRACE
+   30           | LEFT_BRACE Statements Return RIGHT_BRACE
+   31           | LEFT_BRACE Declarations RIGHT_BRACE
+   32           | LEFT_BRACE Return RIGHT_BRACE
+   33           | LEFT_BRACE Statements RIGHT_BRACE
+   34           | LEFT_BRACE RIGHT_BRACE
+
+   35 Parameters: Parameters COMMA Parameter
+   36           | Parameter
+   37           | %empty
+
+   38 Parameter: Type Name
+
+   39 Declarations: Declarations Declaration
+   40             | Declaration
+
+   41 Declaration: Type Names SEMICOLON
+
+   42 Names: Names COMMA Name
+   43      | Name
+
+   44 Statements: Statements Statement
+   45           | Statement
+
+   46 Statement: Name ASSIGN Expression SEMICOLON
+   47          | Name DOT Name ASSIGN Expression SEMICOLON
+   48          | Name ARROW Name ASSIGN Expression SEMICOLON
+   49          | PRINT Expression SEMICOLON
+   50          | IF Expression LEFT_BRACE Statements RIGHT_BRACE
+   51          | IF Expression LEFT_BRACE Statements RIGHT_BRACE ELSE LEFT_BRACE Statements RIGHT_BRACE
+   52          | WHILE Expression LEFT_BRACE Statements RIGHT_BRACE
+   53          | DO LEFT_BRACE Statements RIGHT_BRACE WHILE LEFT_PAREN Expression RIGHT_PAREN SEMICOLON
+   54          | Name DOT Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   55          | Name ARROW Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   56          | Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   57          | Name ARROW Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+   58          | Name DOT Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+   59          | Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+
+   60 Expression: INT_VAL
+   61           | Expression PLUS Expression
+   62           | Expression MINUS Expression
+   63           | Expression MULT Expression
+   64           | Expression DIV Expression
+   65           | Expression GREATER Expression
+   66           | Expression GREATER_THAN_OR_EQUAL Expression
+   67           | Expression EQUALS Expression
+   68           | Expression AND Expression
+   69           | Expression OR Expression
+   70           | NOT Expression
+   71           | MINUS Expression
+   72           | Name
+   73           | Name LEFT_PAREN Arguments RIGHT_PAREN
+   74           | Name DOT Name LEFT_PAREN Arguments RIGHT_PAREN
+   75           | Name ARROW Name LEFT_PAREN Arguments RIGHT_PAREN
+   76           | Name LEFT_PAREN RIGHT_PAREN
+   77           | Name DOT Name LEFT_PAREN RIGHT_PAREN
+   78           | Name ARROW Name LEFT_PAREN RIGHT_PAREN
+   79           | Name DOT Name
+   80           | Name ARROW Name
+   81           | LEFT_PAREN Expression RIGHT_PAREN
+   82           | TRUE
+   83           | FALSE
+   84           | NEW Name
+   85           | NEW Name LEFT_PAREN Arguments_Optional RIGHT_PAREN
+
+   86 Arguments_Optional: Arguments
+   87                   | %empty
+
+   88 Arguments: Arguments COMMA Expression
+   89          | Expression
+
+   90 Return: RETURN Expression SEMICOLON
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    INT <integertype_ptr> (258) 17
+    BOOL <booleantype_ptr> (259) 18
+    FLOAT (260)
+    ARROW (261) 23 25 48 55 57 75 78 80
+    IF (262) 50 51
+    WHILE (263) 52 53
+    DO (264) 53
+    ELSE (265) 51
+    PRINT (266) 49
+    PLUS (267) 61
+    MINUS (268) 62 71
+    MULT (269) 63
+    DIV (270) 64
+    GREATER (271) 65
+    GREATER_THAN_OR_EQUAL (272) 66
+    AND (273) 68
+    OR (274) 69
+    NOT (275) 70
+    UNARY_MINUS (276)
+    NAME <base_char_ptr> (277) 16
+    INT_VAL <base_int> (278) 60
+    FLOAT_VAL (279)
+    TRUE <booleanliteral_ptr> (280) 82
+    FALSE <booleanliteral_ptr> (281) 83
+    NEW (282) 84 85
+    NONE <none_ptr> (283) 20
+    DOT (284) 47 54 58 74 77 79
+    SEMICOLON (285) 15 41 46 47 48 49 53 54 55 56 57 58 59 90
+    COMMA (286) 35 42 88
+    LEFT_BRACE (287) 5 6 7 8 9 10 11 12 27 28 29 30 31 32 33 34 50 51 52 53
+    RIGHT_BRACE (288) 5 6 7 8 9 10 11 12 27 28 29 30 31 32 33 34 50 51 52 53
+    LEFT_PAREN (289) 23 24 25 26 53 54 55 56 57 58 59 73 74 75 76 77 78 81 85
+    RIGHT_PAREN (290) 23 24 25 26 53 54 55 56 57 58 59 73 74 75 76 77 78 81 85
+    EQUALS (291) 67
+    ASSIGN (292) 46 47 48
+    RETURN (293) 90
+    EXTENDS (294) 5 6 7 8
+
+
+Nonterminals, with rules where they appear
+
+    $accept (40)
+        on left: 0
+    Start <program_ptr> (41)
+        on left: 1
+        on right: 0
+    Program <program_ptr> (42)
+        on left: 2
+        on right: 1
+    Classes <class_list_ptr> (43)
+        on left: 3 4
+        on right: 2 3
+    Class <class_ptr> (44)
+        on left: 5 6 7 8 9 10 11 12
+        on right: 3 4
+    Members <declaration_list_ptr> (45)
+        on left: 13 14
+        on right: 5 7 9 10 13
+    Member <declaration_ptr> (46)
+        on left: 15
+        on right: 13 14
+    Name <identifier_ptr> (47)
+        on left: 16
+        on right: 5 6 7 8 9 10 11 12 19 23 24 25 26 38 42 43 46 47 48 54 55 56 57 58 59 72 73 74 75 76 77 78 79 80 84 85
+    Type <type_ptr> (48)
+        on left: 17 18 19 20
+        on right: 15 23 25 38 41
+    Methods <method_list_ptr> (49)
+        on left: 21 22
+        on right: 5 6 9 11 21
+    Method <method_ptr> (50)
+        on left: 23 24 25 26
+        on right: 21 22
+    MethodBody <methodbody_ptr> (51)
+        on left: 27 28 29 30 31 32 33 34
+        on right: 23 24 25 26
+    Parameters <parameter_list_ptr> (52)
+        on left: 35 36 37
+        on right: 23 24 35
+    Parameter <parameter_ptr> (53)
+        on left: 38
+        on right: 35 36
+    Declarations <declaration_list_ptr> (54)
+        on left: 39 40
+        on right: 27 28 29 31 39
+    Declaration <declaration_ptr> (55)
+        on left: 41
+        on right: 39 40
+    Names <identifier_list_ptr> (56)
+        on left: 42 43
+        on right: 15 41 42
+    Statements <statement_list_ptr> (57)
+        on left: 44 45
+        on right: 27 29 30 33 44 50 51 52 53
+    Statement <statement_ptr> (58)
+        on left: 46 47 48 49 50 51 52 53 54 55 56 57 58 59
+        on right: 44 45
+    Expression <expression_ptr> (59)
+        on left: 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85
+        on right: 46 47 48 49 50 51 52 53 61 62 63 64 65 66 67 68 69 70 71 81 88 89 90
+    Arguments_Optional <expression_list_ptr> (60)
+        on left: 86 87
+        on right: 85
+    Arguments <expression_list_ptr> (61)
+        on left: 88 89
+        on right: 54 55 56 73 74 75 86 88
+    Return <returnstatement_ptr> (62)
+        on left: 90
+        on right: 27 28 30 32
+
+
+State 0
+
+    0 $accept: • Start $end
+
+    NAME  shift, and go to state 1
+
+    Start    go to state 2
+    Program  go to state 3
+    Classes  go to state 4
+    Class    go to state 5
+    Name     go to state 6
+
+
+State 1
+
+   16 Name: NAME •
+
+    $default  reduce using rule 16 (Name)
+
+
+State 2
+
+    0 $accept: Start • $end
+
+    $end  shift, and go to state 7
+
+
+State 3
+
+    1 Start: Program •
+
+    $default  reduce using rule 1 (Start)
+
+
+State 4
+
+    2 Program: Classes •
+    3 Classes: Classes • Class
+
+    NAME  shift, and go to state 1
+
+    $default  reduce using rule 2 (Program)
+
+    Class  go to state 8
+    Name   go to state 6
+
+
+State 5
+
+    4 Classes: Class •
+
+    $default  reduce using rule 4 (Classes)
+
+
+State 6
+
+    5 Class: Name • EXTENDS Name LEFT_BRACE Members Methods RIGHT_BRACE
+    6      | Name • EXTENDS Name LEFT_BRACE Methods RIGHT_BRACE
+    7      | Name • EXTENDS Name LEFT_BRACE Members RIGHT_BRACE
+    8      | Name • EXTENDS Name LEFT_BRACE RIGHT_BRACE
+    9      | Name • LEFT_BRACE Members Methods RIGHT_BRACE
+   10      | Name • LEFT_BRACE Members RIGHT_BRACE
+   11      | Name • LEFT_BRACE Methods RIGHT_BRACE
+   12      | Name • LEFT_BRACE RIGHT_BRACE
+
+    LEFT_BRACE  shift, and go to state 9
+    EXTENDS     shift, and go to state 10
+
+
+State 7
+
+    0 $accept: Start $end •
+
+    $default  accept
+
+
+State 8
+
+    3 Classes: Classes Class •
+
+    $default  reduce using rule 3 (Classes)
+
+
+State 9
+
+    9 Class: Name LEFT_BRACE • Members Methods RIGHT_BRACE
+   10      | Name LEFT_BRACE • Members RIGHT_BRACE
+   11      | Name LEFT_BRACE • Methods RIGHT_BRACE
+   12      | Name LEFT_BRACE • RIGHT_BRACE
+
+    INT          shift, and go to state 11
+    BOOL         shift, and go to state 12
+    NAME         shift, and go to state 1
+    NONE         shift, and go to state 13
+    RIGHT_BRACE  shift, and go to state 14
+
+    Members  go to state 15
+    Member   go to state 16
+    Name     go to state 17
+    Type     go to state 18
+    Methods  go to state 19
+    Method   go to state 20
+
+
+State 10
+
+    5 Class: Name EXTENDS • Name LEFT_BRACE Members Methods RIGHT_BRACE
+    6      | Name EXTENDS • Name LEFT_BRACE Methods RIGHT_BRACE
+    7      | Name EXTENDS • Name LEFT_BRACE Members RIGHT_BRACE
+    8      | Name EXTENDS • Name LEFT_BRACE RIGHT_BRACE
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 21
+
+
+State 11
+
+   17 Type: INT •
+
+    $default  reduce using rule 17 (Type)
+
+
+State 12
+
+   18 Type: BOOL •
+
+    $default  reduce using rule 18 (Type)
+
+
+State 13
+
+   20 Type: NONE •
+
+    $default  reduce using rule 20 (Type)
+
+
+State 14
+
+   12 Class: Name LEFT_BRACE RIGHT_BRACE •
+
+    $default  reduce using rule 12 (Class)
+
+
+State 15
+
+    9 Class: Name LEFT_BRACE Members • Methods RIGHT_BRACE
+   10      | Name LEFT_BRACE Members • RIGHT_BRACE
+   13 Members: Members • Member
+
+    INT          shift, and go to state 11
+    BOOL         shift, and go to state 12
+    NAME         shift, and go to state 1
+    NONE         shift, and go to state 13
+    RIGHT_BRACE  shift, and go to state 22
+
+    Member   go to state 23
+    Name     go to state 17
+    Type     go to state 18
+    Methods  go to state 24
+    Method   go to state 20
+
+
+State 16
+
+   14 Members: Member •
+
+    $default  reduce using rule 14 (Members)
+
+
+State 17
+
+   19 Type: Name •
+   23 Method: Name • LEFT_PAREN Parameters RIGHT_PAREN ARROW Type MethodBody
+   24       | Name • LEFT_PAREN Parameters RIGHT_PAREN MethodBody
+   25       | Name • LEFT_PAREN RIGHT_PAREN ARROW Type MethodBody
+   26       | Name • LEFT_PAREN RIGHT_PAREN MethodBody
+
+    LEFT_PAREN  shift, and go to state 25
+
+    $default  reduce using rule 19 (Type)
+
+
+State 18
+
+   15 Member: Type • Names SEMICOLON
+
+    NAME  shift, and go to state 1
+
+    Name   go to state 26
+    Names  go to state 27
+
+
+State 19
+
+   11 Class: Name LEFT_BRACE Methods • RIGHT_BRACE
+   21 Methods: Methods • Method
+
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 28
+
+    Name    go to state 29
+    Method  go to state 30
+
+
+State 20
+
+   22 Methods: Method •
+
+    $default  reduce using rule 22 (Methods)
+
+
+State 21
+
+    5 Class: Name EXTENDS Name • LEFT_BRACE Members Methods RIGHT_BRACE
+    6      | Name EXTENDS Name • LEFT_BRACE Methods RIGHT_BRACE
+    7      | Name EXTENDS Name • LEFT_BRACE Members RIGHT_BRACE
+    8      | Name EXTENDS Name • LEFT_BRACE RIGHT_BRACE
+
+    LEFT_BRACE  shift, and go to state 31
+
+
+State 22
+
+   10 Class: Name LEFT_BRACE Members RIGHT_BRACE •
+
+    $default  reduce using rule 10 (Class)
+
+
+State 23
+
+   13 Members: Members Member •
+
+    $default  reduce using rule 13 (Members)
+
+
+State 24
+
+    9 Class: Name LEFT_BRACE Members Methods • RIGHT_BRACE
+   21 Methods: Methods • Method
+
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 32
+
+    Name    go to state 29
+    Method  go to state 30
+
+
+State 25
+
+   23 Method: Name LEFT_PAREN • Parameters RIGHT_PAREN ARROW Type MethodBody
+   24       | Name LEFT_PAREN • Parameters RIGHT_PAREN MethodBody
+   25       | Name LEFT_PAREN • RIGHT_PAREN ARROW Type MethodBody
+   26       | Name LEFT_PAREN • RIGHT_PAREN MethodBody
+
+    INT          shift, and go to state 11
+    BOOL         shift, and go to state 12
+    NAME         shift, and go to state 1
+    NONE         shift, and go to state 13
+    RIGHT_PAREN  shift, and go to state 33
+
+    RIGHT_PAREN  [reduce using rule 37 (Parameters)]
+    $default     reduce using rule 37 (Parameters)
+
+    Name        go to state 34
+    Type        go to state 35
+    Parameters  go to state 36
+    Parameter   go to state 37
+
+
+State 26
+
+   43 Names: Name •
+
+    $default  reduce using rule 43 (Names)
+
+
+State 27
+
+   15 Member: Type Names • SEMICOLON
+   42 Names: Names • COMMA Name
+
+    SEMICOLON  shift, and go to state 38
+    COMMA      shift, and go to state 39
+
+
+State 28
+
+   11 Class: Name LEFT_BRACE Methods RIGHT_BRACE •
+
+    $default  reduce using rule 11 (Class)
+
+
+State 29
+
+   23 Method: Name • LEFT_PAREN Parameters RIGHT_PAREN ARROW Type MethodBody
+   24       | Name • LEFT_PAREN Parameters RIGHT_PAREN MethodBody
+   25       | Name • LEFT_PAREN RIGHT_PAREN ARROW Type MethodBody
+   26       | Name • LEFT_PAREN RIGHT_PAREN MethodBody
+
+    LEFT_PAREN  shift, and go to state 25
+
+
+State 30
+
+   21 Methods: Methods Method •
+
+    $default  reduce using rule 21 (Methods)
+
+
+State 31
+
+    5 Class: Name EXTENDS Name LEFT_BRACE • Members Methods RIGHT_BRACE
+    6      | Name EXTENDS Name LEFT_BRACE • Methods RIGHT_BRACE
+    7      | Name EXTENDS Name LEFT_BRACE • Members RIGHT_BRACE
+    8      | Name EXTENDS Name LEFT_BRACE • RIGHT_BRACE
+
+    INT          shift, and go to state 11
+    BOOL         shift, and go to state 12
+    NAME         shift, and go to state 1
+    NONE         shift, and go to state 13
+    RIGHT_BRACE  shift, and go to state 40
+
+    Members  go to state 41
+    Member   go to state 16
+    Name     go to state 17
+    Type     go to state 18
+    Methods  go to state 42
+    Method   go to state 20
+
+
+State 32
+
+    9 Class: Name LEFT_BRACE Members Methods RIGHT_BRACE •
+
+    $default  reduce using rule 9 (Class)
+
+
+State 33
+
+   25 Method: Name LEFT_PAREN RIGHT_PAREN • ARROW Type MethodBody
+   26       | Name LEFT_PAREN RIGHT_PAREN • MethodBody
+
+    ARROW       shift, and go to state 43
+    LEFT_BRACE  shift, and go to state 44
+
+    MethodBody  go to state 45
+
+
+State 34
+
+   19 Type: Name •
+
+    $default  reduce using rule 19 (Type)
+
+
+State 35
+
+   38 Parameter: Type • Name
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 46
+
+
+State 36
+
+   23 Method: Name LEFT_PAREN Parameters • RIGHT_PAREN ARROW Type MethodBody
+   24       | Name LEFT_PAREN Parameters • RIGHT_PAREN MethodBody
+   35 Parameters: Parameters • COMMA Parameter
+
+    COMMA        shift, and go to state 47
+    RIGHT_PAREN  shift, and go to state 48
+
+
+State 37
+
+   36 Parameters: Parameter •
+
+    $default  reduce using rule 36 (Parameters)
+
+
+State 38
+
+   15 Member: Type Names SEMICOLON •
+
+    $default  reduce using rule 15 (Member)
+
+
+State 39
+
+   42 Names: Names COMMA • Name
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 49
+
+
+State 40
+
+    8 Class: Name EXTENDS Name LEFT_BRACE RIGHT_BRACE •
+
+    $default  reduce using rule 8 (Class)
+
+
+State 41
+
+    5 Class: Name EXTENDS Name LEFT_BRACE Members • Methods RIGHT_BRACE
+    7      | Name EXTENDS Name LEFT_BRACE Members • RIGHT_BRACE
+   13 Members: Members • Member
+
+    INT          shift, and go to state 11
+    BOOL         shift, and go to state 12
+    NAME         shift, and go to state 1
+    NONE         shift, and go to state 13
+    RIGHT_BRACE  shift, and go to state 50
+
+    Member   go to state 23
+    Name     go to state 17
+    Type     go to state 18
+    Methods  go to state 51
+    Method   go to state 20
+
+
+State 42
+
+    6 Class: Name EXTENDS Name LEFT_BRACE Methods • RIGHT_BRACE
+   21 Methods: Methods • Method
+
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 52
+
+    Name    go to state 29
+    Method  go to state 30
+
+
+State 43
+
+   25 Method: Name LEFT_PAREN RIGHT_PAREN ARROW • Type MethodBody
+
+    INT   shift, and go to state 11
+    BOOL  shift, and go to state 12
+    NAME  shift, and go to state 1
+    NONE  shift, and go to state 13
+
+    Name  go to state 34
+    Type  go to state 53
+
+
+State 44
+
+   27 MethodBody: LEFT_BRACE • Declarations Statements Return RIGHT_BRACE
+   28           | LEFT_BRACE • Declarations Return RIGHT_BRACE
+   29           | LEFT_BRACE • Declarations Statements RIGHT_BRACE
+   30           | LEFT_BRACE • Statements Return RIGHT_BRACE
+   31           | LEFT_BRACE • Declarations RIGHT_BRACE
+   32           | LEFT_BRACE • Return RIGHT_BRACE
+   33           | LEFT_BRACE • Statements RIGHT_BRACE
+   34           | LEFT_BRACE • RIGHT_BRACE
+
+    INT          shift, and go to state 11
+    BOOL         shift, and go to state 12
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    NONE         shift, and go to state 13
+    RIGHT_BRACE  shift, and go to state 58
+    RETURN       shift, and go to state 59
+
+    Name          go to state 60
+    Type          go to state 61
+    Declarations  go to state 62
+    Declaration   go to state 63
+    Statements    go to state 64
+    Statement     go to state 65
+    Return        go to state 66
+
+
+State 45
+
+   26 Method: Name LEFT_PAREN RIGHT_PAREN MethodBody •
+
+    $default  reduce using rule 26 (Method)
+
+
+State 46
+
+   38 Parameter: Type Name •
+
+    $default  reduce using rule 38 (Parameter)
+
+
+State 47
+
+   35 Parameters: Parameters COMMA • Parameter
+
+    INT   shift, and go to state 11
+    BOOL  shift, and go to state 12
+    NAME  shift, and go to state 1
+    NONE  shift, and go to state 13
+
+    Name       go to state 34
+    Type       go to state 35
+    Parameter  go to state 67
+
+
+State 48
+
+   23 Method: Name LEFT_PAREN Parameters RIGHT_PAREN • ARROW Type MethodBody
+   24       | Name LEFT_PAREN Parameters RIGHT_PAREN • MethodBody
+
+    ARROW       shift, and go to state 68
+    LEFT_BRACE  shift, and go to state 44
+
+    MethodBody  go to state 69
+
+
+State 49
+
+   42 Names: Names COMMA Name •
+
+    $default  reduce using rule 42 (Names)
+
+
+State 50
+
+    7 Class: Name EXTENDS Name LEFT_BRACE Members RIGHT_BRACE •
+
+    $default  reduce using rule 7 (Class)
+
+
+State 51
+
+    5 Class: Name EXTENDS Name LEFT_BRACE Members Methods • RIGHT_BRACE
+   21 Methods: Methods • Method
+
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 70
+
+    Name    go to state 29
+    Method  go to state 30
+
+
+State 52
+
+    6 Class: Name EXTENDS Name LEFT_BRACE Methods RIGHT_BRACE •
+
+    $default  reduce using rule 6 (Class)
+
+
+State 53
+
+   25 Method: Name LEFT_PAREN RIGHT_PAREN ARROW Type • MethodBody
+
+    LEFT_BRACE  shift, and go to state 44
+
+    MethodBody  go to state 71
+
+
+State 54
+
+   50 Statement: IF • Expression LEFT_BRACE Statements RIGHT_BRACE
+   51          | IF • Expression LEFT_BRACE Statements RIGHT_BRACE ELSE LEFT_BRACE Statements RIGHT_BRACE
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 80
+
+
+State 55
+
+   52 Statement: WHILE • Expression LEFT_BRACE Statements RIGHT_BRACE
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 81
+
+
+State 56
+
+   53 Statement: DO • LEFT_BRACE Statements RIGHT_BRACE WHILE LEFT_PAREN Expression RIGHT_PAREN SEMICOLON
+
+    LEFT_BRACE  shift, and go to state 82
+
+
+State 57
+
+   49 Statement: PRINT • Expression SEMICOLON
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 83
+
+
+State 58
+
+   34 MethodBody: LEFT_BRACE RIGHT_BRACE •
+
+    $default  reduce using rule 34 (MethodBody)
+
+
+State 59
+
+   90 Return: RETURN • Expression SEMICOLON
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 84
+
+
+State 60
+
+   19 Type: Name •
+   46 Statement: Name • ASSIGN Expression SEMICOLON
+   47          | Name • DOT Name ASSIGN Expression SEMICOLON
+   48          | Name • ARROW Name ASSIGN Expression SEMICOLON
+   54          | Name • DOT Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   55          | Name • ARROW Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   56          | Name • LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   57          | Name • ARROW Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+   58          | Name • DOT Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+   59          | Name • LEFT_PAREN RIGHT_PAREN SEMICOLON
+
+    ARROW       shift, and go to state 85
+    DOT         shift, and go to state 86
+    LEFT_PAREN  shift, and go to state 87
+    ASSIGN      shift, and go to state 88
+
+    $default  reduce using rule 19 (Type)
+
+
+State 61
+
+   41 Declaration: Type • Names SEMICOLON
+
+    NAME  shift, and go to state 1
+
+    Name   go to state 26
+    Names  go to state 89
+
+
+State 62
+
+   27 MethodBody: LEFT_BRACE Declarations • Statements Return RIGHT_BRACE
+   28           | LEFT_BRACE Declarations • Return RIGHT_BRACE
+   29           | LEFT_BRACE Declarations • Statements RIGHT_BRACE
+   31           | LEFT_BRACE Declarations • RIGHT_BRACE
+   39 Declarations: Declarations • Declaration
+
+    INT          shift, and go to state 11
+    BOOL         shift, and go to state 12
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    NONE         shift, and go to state 13
+    RIGHT_BRACE  shift, and go to state 90
+    RETURN       shift, and go to state 59
+
+    Name         go to state 60
+    Type         go to state 61
+    Declaration  go to state 91
+    Statements   go to state 92
+    Statement    go to state 65
+    Return       go to state 93
+
+
+State 63
+
+   40 Declarations: Declaration •
+
+    $default  reduce using rule 40 (Declarations)
+
+
+State 64
+
+   30 MethodBody: LEFT_BRACE Statements • Return RIGHT_BRACE
+   33           | LEFT_BRACE Statements • RIGHT_BRACE
+   44 Statements: Statements • Statement
+
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 94
+    RETURN       shift, and go to state 59
+
+    Name       go to state 95
+    Statement  go to state 96
+    Return     go to state 97
+
+
+State 65
+
+   45 Statements: Statement •
+
+    $default  reduce using rule 45 (Statements)
+
+
+State 66
+
+   32 MethodBody: LEFT_BRACE Return • RIGHT_BRACE
+
+    RIGHT_BRACE  shift, and go to state 98
+
+
+State 67
+
+   35 Parameters: Parameters COMMA Parameter •
+
+    $default  reduce using rule 35 (Parameters)
+
+
+State 68
+
+   23 Method: Name LEFT_PAREN Parameters RIGHT_PAREN ARROW • Type MethodBody
+
+    INT   shift, and go to state 11
+    BOOL  shift, and go to state 12
+    NAME  shift, and go to state 1
+    NONE  shift, and go to state 13
+
+    Name  go to state 34
+    Type  go to state 99
+
+
+State 69
+
+   24 Method: Name LEFT_PAREN Parameters RIGHT_PAREN MethodBody •
+
+    $default  reduce using rule 24 (Method)
+
+
+State 70
+
+    5 Class: Name EXTENDS Name LEFT_BRACE Members Methods RIGHT_BRACE •
+
+    $default  reduce using rule 5 (Class)
+
+
+State 71
+
+   25 Method: Name LEFT_PAREN RIGHT_PAREN ARROW Type MethodBody •
+
+    $default  reduce using rule 25 (Method)
+
+
+State 72
+
+   71 Expression: MINUS • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 100
+
+
+State 73
+
+   70 Expression: NOT • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 101
+
+
+State 74
+
+   60 Expression: INT_VAL •
+
+    $default  reduce using rule 60 (Expression)
+
+
+State 75
+
+   82 Expression: TRUE •
+
+    $default  reduce using rule 82 (Expression)
+
+
+State 76
+
+   83 Expression: FALSE •
+
+    $default  reduce using rule 83 (Expression)
+
+
+State 77
+
+   84 Expression: NEW • Name
+   85           | NEW • Name LEFT_PAREN Arguments_Optional RIGHT_PAREN
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 102
+
+
+State 78
+
+   81 Expression: LEFT_PAREN • Expression RIGHT_PAREN
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 103
+
+
+State 79
+
+   72 Expression: Name •
+   73           | Name • LEFT_PAREN Arguments RIGHT_PAREN
+   74           | Name • DOT Name LEFT_PAREN Arguments RIGHT_PAREN
+   75           | Name • ARROW Name LEFT_PAREN Arguments RIGHT_PAREN
+   76           | Name • LEFT_PAREN RIGHT_PAREN
+   77           | Name • DOT Name LEFT_PAREN RIGHT_PAREN
+   78           | Name • ARROW Name LEFT_PAREN RIGHT_PAREN
+   79           | Name • DOT Name
+   80           | Name • ARROW Name
+
+    ARROW       shift, and go to state 104
+    DOT         shift, and go to state 105
+    LEFT_PAREN  shift, and go to state 106
+
+    $default  reduce using rule 72 (Expression)
+
+
+State 80
+
+   50 Statement: IF Expression • LEFT_BRACE Statements RIGHT_BRACE
+   51          | IF Expression • LEFT_BRACE Statements RIGHT_BRACE ELSE LEFT_BRACE Statements RIGHT_BRACE
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    LEFT_BRACE             shift, and go to state 115
+    EQUALS                 shift, and go to state 116
+
+
+State 81
+
+   52 Statement: WHILE Expression • LEFT_BRACE Statements RIGHT_BRACE
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    LEFT_BRACE             shift, and go to state 117
+    EQUALS                 shift, and go to state 116
+
+
+State 82
+
+   53 Statement: DO LEFT_BRACE • Statements RIGHT_BRACE WHILE LEFT_PAREN Expression RIGHT_PAREN SEMICOLON
+
+    IF     shift, and go to state 54
+    WHILE  shift, and go to state 55
+    DO     shift, and go to state 56
+    PRINT  shift, and go to state 57
+    NAME   shift, and go to state 1
+
+    Name        go to state 95
+    Statements  go to state 118
+    Statement   go to state 65
+
+
+State 83
+
+   49 Statement: PRINT Expression • SEMICOLON
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    SEMICOLON              shift, and go to state 119
+    EQUALS                 shift, and go to state 116
+
+
+State 84
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+   90 Return: RETURN Expression • SEMICOLON
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    SEMICOLON              shift, and go to state 120
+    EQUALS                 shift, and go to state 116
+
+
+State 85
+
+   48 Statement: Name ARROW • Name ASSIGN Expression SEMICOLON
+   55          | Name ARROW • Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   57          | Name ARROW • Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 121
+
+
+State 86
+
+   47 Statement: Name DOT • Name ASSIGN Expression SEMICOLON
+   54          | Name DOT • Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   58          | Name DOT • Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 122
+
+
+State 87
+
+   56 Statement: Name LEFT_PAREN • Arguments RIGHT_PAREN SEMICOLON
+   59          | Name LEFT_PAREN • RIGHT_PAREN SEMICOLON
+
+    MINUS        shift, and go to state 72
+    NOT          shift, and go to state 73
+    NAME         shift, and go to state 1
+    INT_VAL      shift, and go to state 74
+    TRUE         shift, and go to state 75
+    FALSE        shift, and go to state 76
+    NEW          shift, and go to state 77
+    LEFT_PAREN   shift, and go to state 78
+    RIGHT_PAREN  shift, and go to state 123
+
+    Name        go to state 79
+    Expression  go to state 124
+    Arguments   go to state 125
+
+
+State 88
+
+   46 Statement: Name ASSIGN • Expression SEMICOLON
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 126
+
+
+State 89
+
+   41 Declaration: Type Names • SEMICOLON
+   42 Names: Names • COMMA Name
+
+    SEMICOLON  shift, and go to state 127
+    COMMA      shift, and go to state 39
+
+
+State 90
+
+   31 MethodBody: LEFT_BRACE Declarations RIGHT_BRACE •
+
+    $default  reduce using rule 31 (MethodBody)
+
+
+State 91
+
+   39 Declarations: Declarations Declaration •
+
+    $default  reduce using rule 39 (Declarations)
+
+
+State 92
+
+   27 MethodBody: LEFT_BRACE Declarations Statements • Return RIGHT_BRACE
+   29           | LEFT_BRACE Declarations Statements • RIGHT_BRACE
+   44 Statements: Statements • Statement
+
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 128
+    RETURN       shift, and go to state 59
+
+    Name       go to state 95
+    Statement  go to state 96
+    Return     go to state 129
+
+
+State 93
+
+   28 MethodBody: LEFT_BRACE Declarations Return • RIGHT_BRACE
+
+    RIGHT_BRACE  shift, and go to state 130
+
+
+State 94
+
+   33 MethodBody: LEFT_BRACE Statements RIGHT_BRACE •
+
+    $default  reduce using rule 33 (MethodBody)
+
+
+State 95
+
+   46 Statement: Name • ASSIGN Expression SEMICOLON
+   47          | Name • DOT Name ASSIGN Expression SEMICOLON
+   48          | Name • ARROW Name ASSIGN Expression SEMICOLON
+   54          | Name • DOT Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   55          | Name • ARROW Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   56          | Name • LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   57          | Name • ARROW Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+   58          | Name • DOT Name LEFT_PAREN RIGHT_PAREN SEMICOLON
+   59          | Name • LEFT_PAREN RIGHT_PAREN SEMICOLON
+
+    ARROW       shift, and go to state 85
+    DOT         shift, and go to state 86
+    LEFT_PAREN  shift, and go to state 87
+    ASSIGN      shift, and go to state 88
+
+
+State 96
+
+   44 Statements: Statements Statement •
+
+    $default  reduce using rule 44 (Statements)
+
+
+State 97
+
+   30 MethodBody: LEFT_BRACE Statements Return • RIGHT_BRACE
+
+    RIGHT_BRACE  shift, and go to state 131
+
+
+State 98
+
+   32 MethodBody: LEFT_BRACE Return RIGHT_BRACE •
+
+    $default  reduce using rule 32 (MethodBody)
+
+
+State 99
+
+   23 Method: Name LEFT_PAREN Parameters RIGHT_PAREN ARROW Type • MethodBody
+
+    LEFT_BRACE  shift, and go to state 44
+
+    MethodBody  go to state 132
+
+
+State 100
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+   71           | MINUS Expression •
+
+    $default  reduce using rule 71 (Expression)
+
+
+State 101
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+   70           | NOT Expression •
+
+    $default  reduce using rule 70 (Expression)
+
+
+State 102
+
+   84 Expression: NEW Name •
+   85           | NEW Name • LEFT_PAREN Arguments_Optional RIGHT_PAREN
+
+    LEFT_PAREN  shift, and go to state 133
+
+    $default  reduce using rule 84 (Expression)
+
+
+State 103
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+   81           | LEFT_PAREN Expression • RIGHT_PAREN
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    RIGHT_PAREN            shift, and go to state 134
+    EQUALS                 shift, and go to state 116
+
+
+State 104
+
+   75 Expression: Name ARROW • Name LEFT_PAREN Arguments RIGHT_PAREN
+   78           | Name ARROW • Name LEFT_PAREN RIGHT_PAREN
+   80           | Name ARROW • Name
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 135
+
+
+State 105
+
+   74 Expression: Name DOT • Name LEFT_PAREN Arguments RIGHT_PAREN
+   77           | Name DOT • Name LEFT_PAREN RIGHT_PAREN
+   79           | Name DOT • Name
+
+    NAME  shift, and go to state 1
+
+    Name  go to state 136
+
+
+State 106
+
+   73 Expression: Name LEFT_PAREN • Arguments RIGHT_PAREN
+   76           | Name LEFT_PAREN • RIGHT_PAREN
+
+    MINUS        shift, and go to state 72
+    NOT          shift, and go to state 73
+    NAME         shift, and go to state 1
+    INT_VAL      shift, and go to state 74
+    TRUE         shift, and go to state 75
+    FALSE        shift, and go to state 76
+    NEW          shift, and go to state 77
+    LEFT_PAREN   shift, and go to state 78
+    RIGHT_PAREN  shift, and go to state 137
+
+    Name        go to state 79
+    Expression  go to state 124
+    Arguments   go to state 138
+
+
+State 107
+
+   61 Expression: Expression PLUS • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 139
+
+
+State 108
+
+   62 Expression: Expression MINUS • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 140
+
+
+State 109
+
+   63 Expression: Expression MULT • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 141
+
+
+State 110
+
+   64 Expression: Expression DIV • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 142
+
+
+State 111
+
+   65 Expression: Expression GREATER • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 143
+
+
+State 112
+
+   66 Expression: Expression GREATER_THAN_OR_EQUAL • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 144
+
+
+State 113
+
+   68 Expression: Expression AND • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 145
+
+
+State 114
+
+   69 Expression: Expression OR • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 146
+
+
+State 115
+
+   50 Statement: IF Expression LEFT_BRACE • Statements RIGHT_BRACE
+   51          | IF Expression LEFT_BRACE • Statements RIGHT_BRACE ELSE LEFT_BRACE Statements RIGHT_BRACE
+
+    IF     shift, and go to state 54
+    WHILE  shift, and go to state 55
+    DO     shift, and go to state 56
+    PRINT  shift, and go to state 57
+    NAME   shift, and go to state 1
+
+    Name        go to state 95
+    Statements  go to state 147
+    Statement   go to state 65
+
+
+State 116
+
+   67 Expression: Expression EQUALS • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 148
+
+
+State 117
+
+   52 Statement: WHILE Expression LEFT_BRACE • Statements RIGHT_BRACE
+
+    IF     shift, and go to state 54
+    WHILE  shift, and go to state 55
+    DO     shift, and go to state 56
+    PRINT  shift, and go to state 57
+    NAME   shift, and go to state 1
+
+    Name        go to state 95
+    Statements  go to state 149
+    Statement   go to state 65
+
+
+State 118
+
+   44 Statements: Statements • Statement
+   53 Statement: DO LEFT_BRACE Statements • RIGHT_BRACE WHILE LEFT_PAREN Expression RIGHT_PAREN SEMICOLON
+
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 150
+
+    Name       go to state 95
+    Statement  go to state 96
+
+
+State 119
+
+   49 Statement: PRINT Expression SEMICOLON •
+
+    $default  reduce using rule 49 (Statement)
+
+
+State 120
+
+   90 Return: RETURN Expression SEMICOLON •
+
+    $default  reduce using rule 90 (Return)
+
+
+State 121
+
+   48 Statement: Name ARROW Name • ASSIGN Expression SEMICOLON
+   55          | Name ARROW Name • LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   57          | Name ARROW Name • LEFT_PAREN RIGHT_PAREN SEMICOLON
+
+    LEFT_PAREN  shift, and go to state 151
+    ASSIGN      shift, and go to state 152
+
+
+State 122
+
+   47 Statement: Name DOT Name • ASSIGN Expression SEMICOLON
+   54          | Name DOT Name • LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON
+   58          | Name DOT Name • LEFT_PAREN RIGHT_PAREN SEMICOLON
+
+    LEFT_PAREN  shift, and go to state 153
+    ASSIGN      shift, and go to state 154
+
+
+State 123
+
+   59 Statement: Name LEFT_PAREN RIGHT_PAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 155
+
+
+State 124
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+   89 Arguments: Expression •
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    EQUALS                 shift, and go to state 116
+
+    $default  reduce using rule 89 (Arguments)
+
+
+State 125
+
+   56 Statement: Name LEFT_PAREN Arguments • RIGHT_PAREN SEMICOLON
+   88 Arguments: Arguments • COMMA Expression
+
+    COMMA        shift, and go to state 156
+    RIGHT_PAREN  shift, and go to state 157
+
+
+State 126
+
+   46 Statement: Name ASSIGN Expression • SEMICOLON
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    SEMICOLON              shift, and go to state 158
+    EQUALS                 shift, and go to state 116
+
+
+State 127
+
+   41 Declaration: Type Names SEMICOLON •
+
+    $default  reduce using rule 41 (Declaration)
+
+
+State 128
+
+   29 MethodBody: LEFT_BRACE Declarations Statements RIGHT_BRACE •
+
+    $default  reduce using rule 29 (MethodBody)
+
+
+State 129
+
+   27 MethodBody: LEFT_BRACE Declarations Statements Return • RIGHT_BRACE
+
+    RIGHT_BRACE  shift, and go to state 159
+
+
+State 130
+
+   28 MethodBody: LEFT_BRACE Declarations Return RIGHT_BRACE •
+
+    $default  reduce using rule 28 (MethodBody)
+
+
+State 131
+
+   30 MethodBody: LEFT_BRACE Statements Return RIGHT_BRACE •
+
+    $default  reduce using rule 30 (MethodBody)
+
+
+State 132
+
+   23 Method: Name LEFT_PAREN Parameters RIGHT_PAREN ARROW Type MethodBody •
+
+    $default  reduce using rule 23 (Method)
+
+
+State 133
+
+   85 Expression: NEW Name LEFT_PAREN • Arguments_Optional RIGHT_PAREN
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    $default  reduce using rule 87 (Arguments_Optional)
+
+    Name                go to state 79
+    Expression          go to state 124
+    Arguments_Optional  go to state 160
+    Arguments           go to state 161
+
+
+State 134
+
+   81 Expression: LEFT_PAREN Expression RIGHT_PAREN •
+
+    $default  reduce using rule 81 (Expression)
+
+
+State 135
+
+   75 Expression: Name ARROW Name • LEFT_PAREN Arguments RIGHT_PAREN
+   78           | Name ARROW Name • LEFT_PAREN RIGHT_PAREN
+   80           | Name ARROW Name •
+
+    LEFT_PAREN  shift, and go to state 162
+
+    $default  reduce using rule 80 (Expression)
+
+
+State 136
+
+   74 Expression: Name DOT Name • LEFT_PAREN Arguments RIGHT_PAREN
+   77           | Name DOT Name • LEFT_PAREN RIGHT_PAREN
+   79           | Name DOT Name •
+
+    LEFT_PAREN  shift, and go to state 163
+
+    $default  reduce using rule 79 (Expression)
+
+
+State 137
+
+   76 Expression: Name LEFT_PAREN RIGHT_PAREN •
+
+    $default  reduce using rule 76 (Expression)
+
+
+State 138
+
+   73 Expression: Name LEFT_PAREN Arguments • RIGHT_PAREN
+   88 Arguments: Arguments • COMMA Expression
+
+    COMMA        shift, and go to state 156
+    RIGHT_PAREN  shift, and go to state 164
+
+
+State 139
+
+   61 Expression: Expression • PLUS Expression
+   61           | Expression PLUS Expression •
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    MULT  shift, and go to state 109
+    DIV   shift, and go to state 110
+
+    $default  reduce using rule 61 (Expression)
+
+
+State 140
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   62           | Expression MINUS Expression •
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    MULT  shift, and go to state 109
+    DIV   shift, and go to state 110
+
+    $default  reduce using rule 62 (Expression)
+
+
+State 141
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   63           | Expression MULT Expression •
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    $default  reduce using rule 63 (Expression)
+
+
+State 142
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   64           | Expression DIV Expression •
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    $default  reduce using rule 64 (Expression)
+
+
+State 143
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   65           | Expression GREATER Expression •
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS   shift, and go to state 107
+    MINUS  shift, and go to state 108
+    MULT   shift, and go to state 109
+    DIV    shift, and go to state 110
+
+    $default  reduce using rule 65 (Expression)
+
+
+State 144
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   66           | Expression GREATER_THAN_OR_EQUAL Expression •
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS   shift, and go to state 107
+    MINUS  shift, and go to state 108
+    MULT   shift, and go to state 109
+    DIV    shift, and go to state 110
+
+    $default  reduce using rule 66 (Expression)
+
+
+State 145
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   68           | Expression AND Expression •
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    EQUALS                 shift, and go to state 116
+
+    $default  reduce using rule 68 (Expression)
+
+
+State 146
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+   69           | Expression OR Expression •
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    EQUALS                 shift, and go to state 116
+
+    $default  reduce using rule 69 (Expression)
+
+
+State 147
+
+   44 Statements: Statements • Statement
+   50 Statement: IF Expression LEFT_BRACE Statements • RIGHT_BRACE
+   51          | IF Expression LEFT_BRACE Statements • RIGHT_BRACE ELSE LEFT_BRACE Statements RIGHT_BRACE
+
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 165
+
+    Name       go to state 95
+    Statement  go to state 96
+
+
+State 148
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   67           | Expression EQUALS Expression •
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS   shift, and go to state 107
+    MINUS  shift, and go to state 108
+    MULT   shift, and go to state 109
+    DIV    shift, and go to state 110
+
+    $default  reduce using rule 67 (Expression)
+
+
+State 149
+
+   44 Statements: Statements • Statement
+   52 Statement: WHILE Expression LEFT_BRACE Statements • RIGHT_BRACE
+
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 166
+
+    Name       go to state 95
+    Statement  go to state 96
+
+
+State 150
+
+   53 Statement: DO LEFT_BRACE Statements RIGHT_BRACE • WHILE LEFT_PAREN Expression RIGHT_PAREN SEMICOLON
+
+    WHILE  shift, and go to state 167
+
+
+State 151
+
+   55 Statement: Name ARROW Name LEFT_PAREN • Arguments RIGHT_PAREN SEMICOLON
+   57          | Name ARROW Name LEFT_PAREN • RIGHT_PAREN SEMICOLON
+
+    MINUS        shift, and go to state 72
+    NOT          shift, and go to state 73
+    NAME         shift, and go to state 1
+    INT_VAL      shift, and go to state 74
+    TRUE         shift, and go to state 75
+    FALSE        shift, and go to state 76
+    NEW          shift, and go to state 77
+    LEFT_PAREN   shift, and go to state 78
+    RIGHT_PAREN  shift, and go to state 168
+
+    Name        go to state 79
+    Expression  go to state 124
+    Arguments   go to state 169
+
+
+State 152
+
+   48 Statement: Name ARROW Name ASSIGN • Expression SEMICOLON
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 170
+
+
+State 153
+
+   54 Statement: Name DOT Name LEFT_PAREN • Arguments RIGHT_PAREN SEMICOLON
+   58          | Name DOT Name LEFT_PAREN • RIGHT_PAREN SEMICOLON
+
+    MINUS        shift, and go to state 72
+    NOT          shift, and go to state 73
+    NAME         shift, and go to state 1
+    INT_VAL      shift, and go to state 74
+    TRUE         shift, and go to state 75
+    FALSE        shift, and go to state 76
+    NEW          shift, and go to state 77
+    LEFT_PAREN   shift, and go to state 78
+    RIGHT_PAREN  shift, and go to state 171
+
+    Name        go to state 79
+    Expression  go to state 124
+    Arguments   go to state 172
+
+
+State 154
+
+   47 Statement: Name DOT Name ASSIGN • Expression SEMICOLON
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 173
+
+
+State 155
+
+   59 Statement: Name LEFT_PAREN RIGHT_PAREN SEMICOLON •
+
+    $default  reduce using rule 59 (Statement)
+
+
+State 156
+
+   88 Arguments: Arguments COMMA • Expression
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 174
+
+
+State 157
+
+   56 Statement: Name LEFT_PAREN Arguments RIGHT_PAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 175
+
+
+State 158
+
+   46 Statement: Name ASSIGN Expression SEMICOLON •
+
+    $default  reduce using rule 46 (Statement)
+
+
+State 159
+
+   27 MethodBody: LEFT_BRACE Declarations Statements Return RIGHT_BRACE •
+
+    $default  reduce using rule 27 (MethodBody)
+
+
+State 160
+
+   85 Expression: NEW Name LEFT_PAREN Arguments_Optional • RIGHT_PAREN
+
+    RIGHT_PAREN  shift, and go to state 176
+
+
+State 161
+
+   86 Arguments_Optional: Arguments •
+   88 Arguments: Arguments • COMMA Expression
+
+    COMMA  shift, and go to state 156
+
+    $default  reduce using rule 86 (Arguments_Optional)
+
+
+State 162
+
+   75 Expression: Name ARROW Name LEFT_PAREN • Arguments RIGHT_PAREN
+   78           | Name ARROW Name LEFT_PAREN • RIGHT_PAREN
+
+    MINUS        shift, and go to state 72
+    NOT          shift, and go to state 73
+    NAME         shift, and go to state 1
+    INT_VAL      shift, and go to state 74
+    TRUE         shift, and go to state 75
+    FALSE        shift, and go to state 76
+    NEW          shift, and go to state 77
+    LEFT_PAREN   shift, and go to state 78
+    RIGHT_PAREN  shift, and go to state 177
+
+    Name        go to state 79
+    Expression  go to state 124
+    Arguments   go to state 178
+
+
+State 163
+
+   74 Expression: Name DOT Name LEFT_PAREN • Arguments RIGHT_PAREN
+   77           | Name DOT Name LEFT_PAREN • RIGHT_PAREN
+
+    MINUS        shift, and go to state 72
+    NOT          shift, and go to state 73
+    NAME         shift, and go to state 1
+    INT_VAL      shift, and go to state 74
+    TRUE         shift, and go to state 75
+    FALSE        shift, and go to state 76
+    NEW          shift, and go to state 77
+    LEFT_PAREN   shift, and go to state 78
+    RIGHT_PAREN  shift, and go to state 179
+
+    Name        go to state 79
+    Expression  go to state 124
+    Arguments   go to state 180
+
+
+State 164
+
+   73 Expression: Name LEFT_PAREN Arguments RIGHT_PAREN •
+
+    $default  reduce using rule 73 (Expression)
+
+
+State 165
+
+   50 Statement: IF Expression LEFT_BRACE Statements RIGHT_BRACE •
+   51          | IF Expression LEFT_BRACE Statements RIGHT_BRACE • ELSE LEFT_BRACE Statements RIGHT_BRACE
+
+    ELSE  shift, and go to state 181
+
+    $default  reduce using rule 50 (Statement)
+
+
+State 166
+
+   52 Statement: WHILE Expression LEFT_BRACE Statements RIGHT_BRACE •
+
+    $default  reduce using rule 52 (Statement)
+
+
+State 167
+
+   53 Statement: DO LEFT_BRACE Statements RIGHT_BRACE WHILE • LEFT_PAREN Expression RIGHT_PAREN SEMICOLON
+
+    LEFT_PAREN  shift, and go to state 182
+
+
+State 168
+
+   57 Statement: Name ARROW Name LEFT_PAREN RIGHT_PAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 183
+
+
+State 169
+
+   55 Statement: Name ARROW Name LEFT_PAREN Arguments • RIGHT_PAREN SEMICOLON
+   88 Arguments: Arguments • COMMA Expression
+
+    COMMA        shift, and go to state 156
+    RIGHT_PAREN  shift, and go to state 184
+
+
+State 170
+
+   48 Statement: Name ARROW Name ASSIGN Expression • SEMICOLON
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    SEMICOLON              shift, and go to state 185
+    EQUALS                 shift, and go to state 116
+
+
+State 171
+
+   58 Statement: Name DOT Name LEFT_PAREN RIGHT_PAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 186
+
+
+State 172
+
+   54 Statement: Name DOT Name LEFT_PAREN Arguments • RIGHT_PAREN SEMICOLON
+   88 Arguments: Arguments • COMMA Expression
+
+    COMMA        shift, and go to state 156
+    RIGHT_PAREN  shift, and go to state 187
+
+
+State 173
+
+   47 Statement: Name DOT Name ASSIGN Expression • SEMICOLON
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    SEMICOLON              shift, and go to state 188
+    EQUALS                 shift, and go to state 116
+
+
+State 174
+
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+   88 Arguments: Arguments COMMA Expression •
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    EQUALS                 shift, and go to state 116
+
+    $default  reduce using rule 88 (Arguments)
+
+
+State 175
+
+   56 Statement: Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON •
+
+    $default  reduce using rule 56 (Statement)
+
+
+State 176
+
+   85 Expression: NEW Name LEFT_PAREN Arguments_Optional RIGHT_PAREN •
+
+    $default  reduce using rule 85 (Expression)
+
+
+State 177
+
+   78 Expression: Name ARROW Name LEFT_PAREN RIGHT_PAREN •
+
+    $default  reduce using rule 78 (Expression)
+
+
+State 178
+
+   75 Expression: Name ARROW Name LEFT_PAREN Arguments • RIGHT_PAREN
+   88 Arguments: Arguments • COMMA Expression
+
+    COMMA        shift, and go to state 156
+    RIGHT_PAREN  shift, and go to state 189
+
+
+State 179
+
+   77 Expression: Name DOT Name LEFT_PAREN RIGHT_PAREN •
+
+    $default  reduce using rule 77 (Expression)
+
+
+State 180
+
+   74 Expression: Name DOT Name LEFT_PAREN Arguments • RIGHT_PAREN
+   88 Arguments: Arguments • COMMA Expression
+
+    COMMA        shift, and go to state 156
+    RIGHT_PAREN  shift, and go to state 190
+
+
+State 181
+
+   51 Statement: IF Expression LEFT_BRACE Statements RIGHT_BRACE ELSE • LEFT_BRACE Statements RIGHT_BRACE
+
+    LEFT_BRACE  shift, and go to state 191
+
+
+State 182
+
+   53 Statement: DO LEFT_BRACE Statements RIGHT_BRACE WHILE LEFT_PAREN • Expression RIGHT_PAREN SEMICOLON
+
+    MINUS       shift, and go to state 72
+    NOT         shift, and go to state 73
+    NAME        shift, and go to state 1
+    INT_VAL     shift, and go to state 74
+    TRUE        shift, and go to state 75
+    FALSE       shift, and go to state 76
+    NEW         shift, and go to state 77
+    LEFT_PAREN  shift, and go to state 78
+
+    Name        go to state 79
+    Expression  go to state 192
+
+
+State 183
+
+   57 Statement: Name ARROW Name LEFT_PAREN RIGHT_PAREN SEMICOLON •
+
+    $default  reduce using rule 57 (Statement)
+
+
+State 184
+
+   55 Statement: Name ARROW Name LEFT_PAREN Arguments RIGHT_PAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 193
+
+
+State 185
+
+   48 Statement: Name ARROW Name ASSIGN Expression SEMICOLON •
+
+    $default  reduce using rule 48 (Statement)
+
+
+State 186
+
+   58 Statement: Name DOT Name LEFT_PAREN RIGHT_PAREN SEMICOLON •
+
+    $default  reduce using rule 58 (Statement)
+
+
+State 187
+
+   54 Statement: Name DOT Name LEFT_PAREN Arguments RIGHT_PAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 194
+
+
+State 188
+
+   47 Statement: Name DOT Name ASSIGN Expression SEMICOLON •
+
+    $default  reduce using rule 47 (Statement)
+
+
+State 189
+
+   75 Expression: Name ARROW Name LEFT_PAREN Arguments RIGHT_PAREN •
+
+    $default  reduce using rule 75 (Expression)
+
+
+State 190
+
+   74 Expression: Name DOT Name LEFT_PAREN Arguments RIGHT_PAREN •
+
+    $default  reduce using rule 74 (Expression)
+
+
+State 191
+
+   51 Statement: IF Expression LEFT_BRACE Statements RIGHT_BRACE ELSE LEFT_BRACE • Statements RIGHT_BRACE
+
+    IF     shift, and go to state 54
+    WHILE  shift, and go to state 55
+    DO     shift, and go to state 56
+    PRINT  shift, and go to state 57
+    NAME   shift, and go to state 1
+
+    Name        go to state 95
+    Statements  go to state 195
+    Statement   go to state 65
+
+
+State 192
+
+   53 Statement: DO LEFT_BRACE Statements RIGHT_BRACE WHILE LEFT_PAREN Expression • RIGHT_PAREN SEMICOLON
+   61 Expression: Expression • PLUS Expression
+   62           | Expression • MINUS Expression
+   63           | Expression • MULT Expression
+   64           | Expression • DIV Expression
+   65           | Expression • GREATER Expression
+   66           | Expression • GREATER_THAN_OR_EQUAL Expression
+   67           | Expression • EQUALS Expression
+   68           | Expression • AND Expression
+   69           | Expression • OR Expression
+
+    PLUS                   shift, and go to state 107
+    MINUS                  shift, and go to state 108
+    MULT                   shift, and go to state 109
+    DIV                    shift, and go to state 110
+    GREATER                shift, and go to state 111
+    GREATER_THAN_OR_EQUAL  shift, and go to state 112
+    AND                    shift, and go to state 113
+    OR                     shift, and go to state 114
+    RIGHT_PAREN            shift, and go to state 196
+    EQUALS                 shift, and go to state 116
+
+
+State 193
+
+   55 Statement: Name ARROW Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON •
+
+    $default  reduce using rule 55 (Statement)
+
+
+State 194
+
+   54 Statement: Name DOT Name LEFT_PAREN Arguments RIGHT_PAREN SEMICOLON •
+
+    $default  reduce using rule 54 (Statement)
+
+
+State 195
+
+   44 Statements: Statements • Statement
+   51 Statement: IF Expression LEFT_BRACE Statements RIGHT_BRACE ELSE LEFT_BRACE Statements • RIGHT_BRACE
+
+    IF           shift, and go to state 54
+    WHILE        shift, and go to state 55
+    DO           shift, and go to state 56
+    PRINT        shift, and go to state 57
+    NAME         shift, and go to state 1
+    RIGHT_BRACE  shift, and go to state 197
+
+    Name       go to state 95
+    Statement  go to state 96
+
+
+State 196
+
+   53 Statement: DO LEFT_BRACE Statements RIGHT_BRACE WHILE LEFT_PAREN Expression RIGHT_PAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 198
+
+
+State 197
+
+   51 Statement: IF Expression LEFT_BRACE Statements RIGHT_BRACE ELSE LEFT_BRACE Statements RIGHT_BRACE •
+
+    $default  reduce using rule 51 (Statement)
+
+
+State 198
+
+   53 Statement: DO LEFT_BRACE Statements RIGHT_BRACE WHILE LEFT_PAREN Expression RIGHT_PAREN SEMICOLON •
+
+    $default  reduce using rule 53 (Statement)
