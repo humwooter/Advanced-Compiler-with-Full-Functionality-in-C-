@@ -6,7 +6,7 @@
 
 void CodeGenerator::visitProgramNode(ProgramNode* node) {
     // WRITEME: Replace with code if necessary
-  std::string wub = "%d\n"; 
+  std::string wub = "%d\\n"; 
   std::cout << "# PROGRAM NODE" << std::endl;
   std::cout << " .data" << std::endl; //check
   //std::cout << " printstr: .asciz \"%d\n\" " << std::endl; //check
@@ -151,8 +151,15 @@ void CodeGenerator::visitGreaterNode(GreaterNode* node) { //jump instr using cmp
   std::string greaterLabel = "label_" + std::to_string(nextLabel());
   std::cout << "  pop %ebx" << std::endl; //reg2
   std::cout << "  pop %eax" << std::endl; //reg1  
-  std::cout << "  cmp %eax, %ebx" << std::endl;
-  std::cout << "  jg " << greaterLabel << std::endl;
+  std::cout << "  cmp %ebx, %eax" << std::endl;
+  std::cout << " setg %al" << std::endl;
+  std::cout << " movzx %al, %eax" << std::endl;
+  std::cout << " push %eax" << std::endl; 
+
+  std::cout << "  jg " << greater_equalLabel << std::endl;
+  std::string label = "label_" + std::to_string(nextLabel());
+  std::cout << " jmp  " << label << std::endl;
+  
 }
 //check
 void CodeGenerator::visitGreaterEqualNode(GreaterEqualNode* node) { //jump instr using cmp and jge
@@ -162,23 +169,40 @@ void CodeGenerator::visitGreaterEqualNode(GreaterEqualNode* node) { //jump instr
   std::string greater_equalLabel = "label_" + std::to_string(nextLabel());
   std::cout << "  pop %ebx" << std::endl; //reg2
   std::cout << "  pop %eax" << std::endl; //reg1  
-  std::cout << "  cmp %eax, %ebx" << std::endl;
-  std::cout << " setge %ebx" << std::endl;
-  std::cout << " movzx %eax, %ebx" << std::endl;
+  std::cout << "  cmp %ebx, %eax" << std::endl;
+  std::cout << " setge %al" << std::endl;
+  std::cout << " movzx %al, %eax" << std::endl;
   std::cout << " push %eax" << std::endl; 
+
   std::cout << "  jge " << greater_equalLabel << std::endl;
+  std::string label = "label_" + std::to_string(nextLabel());
+  std::cout << " jmp  " << label << std::endl;
+    
   //might be wrong
 }
 //check
 void CodeGenerator::visitEqualNode(EqualNode* node) { //jump instr using cmp and je
   // WRITEME: Replace with code if necessar
   node->visit_children(this);
-  std::cout << " #EQUAL" << std::endl; 
-  std::string equalLabel = "label_" + std::to_string(nextLabel());
-  std::cout << "  pop %ebx" << std::endl; //reg2
-  std::cout << "  pop %eax" << std::endl; //reg1
-  std::cout << "  cmp %eax, %ebx" << std::endl;
-  std::cout << "  je " << equalLabel << std::endl;
+   std::cout << "  # Equal Node" << std::endl;
+   std::string equalLabel = "label_" + std::to_string(nextLabel());   
+    std::cout << " pop %ebx" << std::endl;
+    std::cout << " pop %eax" << std::endl;
+    std::cout << " cmp %ebx, %eax" << std::endl;
+    std::cout << " je " << equalLabel << std::endl;
+    std::cout << " push $1" << std::endl;
+    std::string not_equalLabel = "label_" + std::to_string(nextLabel());   
+    std::cout << " jmp  " << not_equalLabel << std::endl;
+    //std::cout << lab1 << ": " << std::endl;
+    std::cout << " push $0" << std::endl;
+    //std::cout << lab2 << ": " << std::endl;
+    
+  // std::cout << " #EQUAL" << std::endl; 
+  // std::string equalLabel = "label_" + std::to_string(nextLabel());
+  // std::cout << "  pop %ebx" << std::endl; //reg2
+  // std::cout << "  pop %eax" << std::endl; //reg1
+  // std::cout << "  cmp %eax, %ebx" << std::endl;
+  // std::cout << "  je " << equalLabel << std::endl;
   //might be wrong
 }
 
