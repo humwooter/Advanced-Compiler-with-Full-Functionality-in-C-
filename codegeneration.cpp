@@ -213,6 +213,11 @@ void CodeGenerator::visitNotNode(NotNode* node) { //might be wrong
 
 void CodeGenerator::visitNegationNode(NegationNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+  std::cout << " #NEGATION" << std::endl;
+  std::cout << " pop %eax" << std::endl;
+  std::cout << " neg %eax" << std::endl;
+  std::cout << " push %eax" << std::endl; 
 }
 
 void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
