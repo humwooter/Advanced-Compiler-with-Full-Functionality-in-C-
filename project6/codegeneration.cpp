@@ -293,10 +293,20 @@ void CodeGenerator::visitVariableNode(VariableNode* node) {
 
 void CodeGenerator::visitIntegerLiteralNode(IntegerLiteralNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+  std::string action = "mov $" + node->val + ", eax";
+  std::cout << " #INTEGER_LITERAL" << std::endl; 
+  std::cout << action << std::endl;
+  std::cout << " push %eax" << std::endl; 
 }
 
 void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
   // WRITEME: Replace with code if necessary
+  node->visit_children(this);
+  std::string action = "mov $" + node->val + ", eax";
+  std::cout << " #BOOLEAN_LITERAL" << std::endl; 
+  std::cout << action << std::endl; 
+  std::cout << " push %eax" << std::endl;  
 }
 
 void CodeGenerator::visitNewNode(NewNode* node) {
