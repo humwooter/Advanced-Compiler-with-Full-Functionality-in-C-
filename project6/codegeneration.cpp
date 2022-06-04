@@ -670,10 +670,10 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   // no return value
 
   // restore caller-save
-  std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
-  std::cout << " pop %ecx" << std::endl;
   std::cout << " pop %edx" << std::endl;
-
+  std::cout << " pop %ecx" << std::endl;
+  std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
+ 
   // push return to stack
   // std::cout << " push %ebx" << std::endl;
 
