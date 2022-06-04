@@ -192,6 +192,22 @@ std::string findClassNameFromMethodName(std::string methodName, std::string clas
       }
       return "";
 }
+
+int findClassSize(std::string className, ClassTable* classTable) {
+  int size = 0;
+  ClassInfo currentClassInfo = classTable->at(className);
+  size += currentClassInfo.membersSize;
+  std::string currentSuperclassName = currentClassInfo.superClassName;
+
+  while (currentSuperclassName != "") {
+    currentClassInfo = classTable->at(currentSuperclassName);
+    size += currentClassInfo.membersSize;
+    currentSuperclassName = currentClassInfo.superClassName;
+  }
+
+  return size;
+}
+
 /* -------------------------------- helper functions ----------------------------------*/
 
 
@@ -550,10 +566,6 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
     this->currentMethodInfo = ((this->classTable->at(tempClassName)).methods)->at(this->currentMethodName);
     std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
   } else {
-
-    // this->currentMethodName = node->identifier_1->name;
-    // this->currentMethodInfo = (this->currentClassInfo.methods)->at(this->currentMethodName);
-    // std::cout << " call " << this->currentClassName << "_" << node->identifier_1->name << std::endl;
     this->currentMethodName = node->identifier_1->name;
       this->currentMethodInfo = findMethodInfo(this->currentMethodName, this->currentClassName, this->classTable);
       std::string tempClassName = findClassNameFromMethodName(this->currentMethodName, this->currentClassName, this->classTable);
@@ -575,8 +587,6 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
   std::cout << " pop %ecx" << std::endl;
   std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
 
-  std::cout << " push %ebx" << std::endl;
-
 }
 
 void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
@@ -588,6 +598,7 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
 
 void CodeGenerator::visitVariableNode(VariableNode* node) {
   // WRITEME: Replace with code if necessary
+  //node->visit_children(this);
   std::cout << "# VARIABLE" << std::endl;
   std::string var_name = node->identifier->name;
 
@@ -612,6 +623,65 @@ void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
 
 void CodeGenerator::visitNewNode(NewNode* node) {
   // WRITEME: Replace with code if necessary
+  std::cout << "#### NEW NODE (1): allocate space" << std::endl;
+  // 1. allocate space
+  std::string objectTypeName = node->identifier->name;
+  int size = findClassSize(objectTypeName, this->classTable);
+  
+  std::cout << " push $" << size << std::endl;
+  std::cout << " call malloc" << std::endl;
+  std::cout << " add $4, %esp" << std::endl;
+  std::cout << " push %eax" << std::endl; // is this ok to be called here?
+
+  // ^ i think %eax is the self pointer that i can use when calling constructor?
+
+  // 2. call constructor
+  std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
+  // (1) save caller registers
+  std::cout << " push %eax" << std::endl;
+  std::cout << " push %ecx" << std::endl;
+  std::cout << " push %edx" << std::endl;
+
+  // (2) push arguments + self pointer on the stack
+  // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
+  if(node->expression_list){
+    for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+      //visitExpressionNode((*it), this);
+      (*it)->accept(this);
+    }
+  }
+  // self pointer?
+  std::cout << " push %eax" << std::endl;
+
+  std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
+  std::cout << objectTypeName  << "_" << objectTypeName << std::endl;
+  // only exception is Main_main but idt you ever call that
+
+
+  std::cout << "#### METHOD CALL NODE (3): constructor call - post-return sequence" << std::endl;
+  if(node->expression_list){
+    for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+      // visitExpressionNode((*it), this);
+      std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
+      // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
+    }
+  }
+  // std::cout << " move %eax, %ebx" << std::endl; // store return value in %ebx
+  // no return value
+
+  // restore caller-save
+  std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
+  std::cout << " pop %ecx" << std::endl;
+  std::cout << " pop %edx" << std::endl;
+
+  // push return to stack
+  // std::cout << " push %ebx" << std::endl;
+
+  // if an allocated object is of a class with a super type, only the child class constructor is called
+  
+  // constructors may be chained, but this must be explicitly done by the programmer
+  // ^ going to assume this is handled by methodnode
+
 }
 
 void CodeGenerator::visitIntegerTypeNode(IntegerTypeNode* node) {
