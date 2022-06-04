@@ -551,6 +551,8 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
   std::cout << " push %ecx" << std::endl;
   std::cout << " push %edx" << std::endl;
 
+  // std::string method_call_class;
+  // std::string method_name;
   if(node->expression_list){
     for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
       //visitExpressionNode((*it), this);
@@ -563,12 +565,13 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
       {
         // get local offset
         objectOffset = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
+        std::cout << "  push " << objectOffset << "(%ebp)" << std::endl;
       } else {
       std::cout << " mov 8(%ebp), %ebx" << std::endl;
       objectOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
       std::cout << " mov " << objectOffset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
       std::cout << " push %eax" << std::endl;
-    }
+    } 
   } else {
     std::cout << " push 8(%ebp)" << std::endl;
   }
@@ -596,11 +599,17 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
     }
   }
 
+  //removing arguments from stack
+  int arg_size = 4;
+  if (node->expression_list) {
+    arg_size += 4 * node->expression_list->size();
+  }
+  std::cout << " add $" << std::to_string(arg_size) << ", %esp" << std::endl;  
   std::cout << " mov %eax, %ebx" << std::endl; 
   std::cout << " pop %edx" << std::endl;
   std::cout << " pop %ecx" << std::endl;
   std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
-
+  std::cout << " push %ebx" << std::endl; 
 }
 
 void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
