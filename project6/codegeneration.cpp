@@ -293,7 +293,7 @@ void CodeGenerator::visitDeclarationNode(DeclarationNode* node) {
 void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
   // WRITEME: Replace with code if necessary
   std::cout << "#RETURN_STATEMENT" << std::endl;
-  
+    node->visit_children(this);
 }
 
 void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
@@ -531,62 +531,123 @@ void CodeGenerator::visitNegationNode(NegationNode* node) {
 }
 
 void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
-  std::cout << "#### METHOD CALL NODE (1): pre-call sequence" << std::endl;
-  // (1) save caller registers
-  std::cout << " push %eax" << std::endl;
-  std::cout << " push %ecx" << std::endl;
-  std::cout << " push %edx" << std::endl;
+  // WRITEME: Replace with code if necessary
+  // this->currentMethodName = node->identifier_1->name;
+  // if (this->currentClassInfo.methods->find(this->currentMethodName) != this->currentClassInfo.methods->end()) {
+  //   this->currentMethodInfo = this->currentClassInfo.methods->at(this->currentMethodName); // typechecker checks that this exists in table??
+  // }
+  // ADD object.method case
+  // ^ needs to be moved
 
-  if(node->expression_list){
-    for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-      //visitExpressionNode((*it), this);
-      (*it)->accept(this);
+  // in general may have to debug currentMethodName and currentMethodInfo and make sure they're doing what we want them to do
+
+    std::cout << "#### METHOD CALL NODE (1): pre-call sequence" << std::endl;
+    // (1) save caller registers
+    std::cout << " push %eax" << std::endl;
+    std::cout << " push %ecx" << std::endl;
+    std::cout << " push %edx" << std::endl;
+
+    // (2) push arguments + self pointer on the stack
+    // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
+     if(node->expression_list){
+        for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+          //visitExpressionNode((*it), this);
+            (*it)->accept(this);
+        }
     }
-  }
-  if(node->identifier_2) { // if local
-    int objectOffset;
-    if (isLocal(node->identifier_1->name, currentMethodInfo))
+    // ADD object.method case:
+    // object (identifier_1->name) will be in variabletable of method
+    // does that mean i have to change the currentMethodName and currentMethodInfo setting to be after this? bc i still need currentMethodInfo for caller frame to find this self ptr?
+
+  // bool isLocal(ClassTable* classTable, std::string memberName, std::string methodName, std::string className);
+    if(node->identifier_2) {
+      // if (isLocal(this->classTable, identifier_1->name, this->currentMethodName, this->currentClassName)) // need to implement isLocal
+      // bool isLocal(std::string memberName, MethodInfo methodInfo) {
+      int objectOffset;
+      if (isLocal(node->identifier_1->name, currentMethodInfo))
       {
         // get local offset
         objectOffset = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
-      } else {
-      std::cout << " mov 8(%ebp), %ebx" << std::endl;
-      objectOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
-      std::cout << " mov" << objectOffset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
-      std::cout << " push %eax" << std::endl;
+      } else { // class or superclass
+        // self pointer move 8(ebp) to ebx
+        std::cout << " mov 8(%ebp), %ebx" << std::endl;
+        // int findOffset(ClassTable* classTable, std::string memberName, std::string className) {
+        objectOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
+        std::cout << " mov" << objectOffset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
+        std::cout << " push %eax" << std::endl;
+      }
+    } else {
+      std::cout << " push 8(%ebp)" << std::endl;
     }
-  } else {
-    std::cout << " push 8(%ebp)" << std::endl;
-  }
-  std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
-  if (node->identifier_2) { // must be object via TypeCheck
-    VariableInfo memberInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-    std::string tempClassName = memberInfo.type.objectClassName;
-    this->currentMethodName = node->identifier_2->name;
-    this->currentMethodInfo = ((this->classTable->at(tempClassName)).methods)->at(this->currentMethodName);
-    std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
-  } else {
-    this->currentMethodName = node->identifier_1->name;
+
+// ignore the following notes I took at OH. skip to #### METHOD CALL NODE (2)
+// object.method
+// case local object  offset ebp
+// case class or superclass member: member offsets
+// first get pointer to heap, then need to calculate offset
+
+/* helper function implementation  for calculating objectOffset (call for calculating that)
+1. superclass offset
+2. local member offset
+
+membername: which class contains member, while loop.
+get local offset in that class for that member
+check whether that class has superclass, accumulate recursively superclass membersize
+*/
+
+  // this->currentMethodName = node->identifier_1->name;
+  // if (this->currentClassInfo.methods->find(this->currentMethodName) != this->currentClassInfo.methods->end()) {
+  //   this->currentMethodInfo = this->currentClassInfo.methods->at(this->currentMethodName); // typechecker checks that this exists in table??
+  // }
+
+
+
+    std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
+    if (node->identifier_2) { // must be object via TypeCheck
+      // need to find class name from identifier_1->name, which is either a local variable/parameter (find in currentMethodNodeInfo VariableTable) or class or superclass member
+      // method name is just identifier_2->name
+      // VariableInfo->CompoundType type->std::string objectClassName;
+
+      // VariableInfo findVariableInfo(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
+      VariableInfo memberInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+      // need to set currentMethodName and currentMethodInfo
+      std::string tempClassName = memberInfo.type.objectClassName;
+      this->currentMethodName = node->identifier_2->name;
+      this->currentMethodInfo = ((this->classTable->at(tempClassName)).methods)->at(this->currentMethodName);
+      
+      std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
+    } else {
+      // ADD superclass method
+      this->currentMethodName = node->identifier_1->name;
       this->currentMethodInfo = findMethodInfo(this->currentMethodName, this->currentClassName, this->classTable);
+      // this->currentMethodInfo = (this->currentClassInfo.methods)->at(this->currentMethodName);
+      
+      // MethodInfo findMethodInfoFromMethodName(std::string methodName, std::string className, ClassTable* classTable) 
       std::string tempClassName = findClassNameFromMethodName(this->currentMethodName, this->currentClassName, this->classTable);
       std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
-  }
-
-
-  std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
-  if(node->expression_list){
-    for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-      // visitExpressionNode((*it), this);
-      std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
-      // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
+    
     }
-  }
 
-  std::cout << " mov %eax, %ebx" << std::endl; 
-  std::cout << " pop %edx" << std::endl;
-  std::cout << " pop %ecx" << std::endl;
-  std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
 
+    std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
+         if(node->expression_list){
+          for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+              // visitExpressionNode((*it), this);
+              std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
+              // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
+        }
+    }
+    std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
+
+    // restore caller-save
+    std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
+    std::cout << " pop %ecx" << std::endl;
+    std::cout << " pop %edx" << std::endl;
+
+    // push return to stack
+    std::cout << " push %ebx" << std::endl;
+
+    // do we need to reset currentMethodName and currentMethodInfo?
 }
 
 void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
