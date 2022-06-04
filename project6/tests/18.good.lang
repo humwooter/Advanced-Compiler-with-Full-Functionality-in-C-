@@ -11,7 +11,7 @@ classA {
 Main {
 
      main() -> none {
-     	    classA a;
+     	classA a;
 	    integer i;
 
 	    a = new classA;

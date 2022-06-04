@@ -6,16 +6,12 @@ classA {
 Main {
 
      main() -> none {
-     	    classA a;
+     	classA a;
 
 	    a = new classA;
          a.x = 5;
          a.y = 6;
-
-         print a.x;
-         print a.y;
-
-         print a.x * a.y - 1;
+         
      }
 
 }
