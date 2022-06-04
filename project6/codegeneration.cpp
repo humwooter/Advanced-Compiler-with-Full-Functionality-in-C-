@@ -620,7 +620,16 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
     VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
     std::string currentClassName = tempVariableInfo.type.objectClassName;
     var_to_eax(node->identifier_2->name, currentClassInfo);
-    std::cout << " push %eax" << std::endl; 
+
+    std::string class_name = node->identifier_1->name;
+    std::string mem = node->identifier_2->name;
+    //int offset;
+    
+    if (this->classTable->find(class_name) != this->classTable->end()) {
+      ClassInfo curr = (*classTable)[class_name];
+      offset = curr.members->at(mem).offset;
+    }
+    std::cout << " push " << std::to_string(offset) << "(%eax)" << std::endl; 
 }
 
 void CodeGenerator::visitVariableNode(VariableNode* node) {
