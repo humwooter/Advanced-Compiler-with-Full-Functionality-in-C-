@@ -346,6 +346,18 @@ void argumentsHelper(std::list<CompoundType> *parameters, std::list<ExpressionNo
 
   return;
 }
+bool has_constructor(ClassTable* classTable, std::string className) {
+  bool valid = false;
+  if (classTable->find(className) == classTable->end()) return false;
+
+  else {
+    ClassInfo currClassInfo = classTable->at(className);
+    MethodTable *currMethods = currClassInfo.methods;
+    if (currMethods->find(className) != currMethods->end()) return true;
+  }
+  return false;
+}
+
 
 /* -------------------------------- helper functions ----------------------------------*/        
 
@@ -738,10 +750,13 @@ void TypeCheck::visitNewNode(NewNode* node) {
   if (this->classTable->find(constructor_name) == this->classTable->end()) {
     typeError(undefined_class);
   }
-
-  ClassInfo class_info = this->classTable->at(constructor_name);
-  MethodInfo method_info = class_info.methods->at(constructor_name);
-  argumentsHelper(method_info.parameters, node->expression_list);
+  if (has_constructor(this->classTable, this->currentClassName)) {
+    //typeError(undefined_class);
+    std::cout << "new change?" << std::endl; 
+    ClassInfo class_info = this->classTable->at(constructor_name);
+    MethodInfo method_info = class_info.methods->at(constructor_name);
+    //argumentsHelper(method_info.parameters, node->expression_list);
+  }
 }
 
 void TypeCheck::visitIntegerTypeNode(IntegerTypeNode* node) {
@@ -757,7 +772,7 @@ void TypeCheck::visitBooleanTypeNode(BooleanTypeNode* node) {
 void TypeCheck::visitObjectTypeNode(ObjectTypeNode* node) {
   node->basetype = bt_object;
   node->objectClassName = node->identifier->name;
-
+  std::cout << "# visits object type node: " << node->objectClassName << std::endl; //
   if (this->classTable->find(node->identifier->name) == this->classTable->end()) {
       typeError(undefined_class);
     }
