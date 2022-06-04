@@ -175,24 +175,22 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
 
 
 
-void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
+void CodeGenerator::visitAssignmentNode(AssignmentNode* node) {
   node->visit_children(this);
   std::cout << " pop %ecx" << std::endl;
   std::cout << "#### ASSIGNMENT NODE" << std::endl;
 
-  if(node->identifier_2) {
+  if(node->identifier_2) { // local.member
       int offset1;
-      if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member (17.good.lang)
+      if (isLocal(node->identifier_1->name, this->currentMethodInfo))
       {
         offset1 = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
         std::cout << " mov " << offset1 << "(%ebp), %eax" << std::endl;
-        // std::cout << " push %eax" << std::endl;
         // i believe %eax holds local's pointer
-      } else { // class or superclass // member.member
+      } else { // member.member
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
-        offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
-        std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
-        // std::cout << " push %eax" << std::endl;
+        offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
+        std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl; 
         // theoretically %eax holds member's pointer?
       }
       // %eax should hold pointer to identifier_1
@@ -203,19 +201,15 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
       std::cout << " mov %ecx, %eax" << std::endl;
         
       } else {
-        // std::cout << " push 8(%ebp)" << std::endl;
         if (isLocal(node->identifier_1->name, this->currentMethodInfo)) { // local --> DEFINITELY WORKS
             int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
             std::cout << " mov %ecx, " << offset << "(%ebp)" << std::endl;
         } else { // member
-            
-            // taken from variable:
             int memberOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
             std::cout << "   mov " << "8(%ebp), %eax" << std::endl; 
             std::cout << "   mov " << memberOffset << "(%eax), %eax" << std::endl;
             std::cout << "   mov %ecx, %eax" << std::endl;
         }
     }
-    // */
 
 }

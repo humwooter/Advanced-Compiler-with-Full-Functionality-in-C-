@@ -366,9 +366,9 @@ void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
 }
 
 void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
+  std::cout << "#### ASSIGNMENT NODE" << std::endl;
   node->visit_children(this);
   std::cout << " pop %ecx" << std::endl;
-  std::cout << "#### ASSIGNMENT NODE" << std::endl;
   /* cases:
   member
   localVar
@@ -376,11 +376,14 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
   localVar.member
   */
 
-  if(node->identifier_2) {
+  // /*
+
+  if(node->identifier_2) { // local.member or member.member
       int offset1;
       if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member (17.good.lang)
       {
-        offset1 = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
+        offset1 = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+        // ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
         std::cout << " mov " << offset1 << "(%ebp), %eax" << std::endl;
         // std::cout << " push %eax" << std::endl;
         // i believe %eax holds local's pointer
@@ -393,14 +396,13 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
       }
       // %eax should hold pointer to identifier_1
       VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+      // std::cout << " mov 8(%eax), %eax" << std::endl;
       int offset2 = findOffset(this->classTable, node->identifier_2->name, tempVariableInfo.type.objectClassName);
-      std::cout << " mov 8(%eax), %eax" << std::endl;
-
       // can u one-line the following two lines
       std::cout << " mov " << offset2 << "(%eax), %eax" << std::endl;
       std::cout << " mov %ecx, %eax" << std::endl;
         
-      } else {
+      } else { // local or member
         // std::cout << " push 8(%ebp)" << std::endl;
         if (isLocal(node->identifier_1->name, this->currentMethodInfo)) { // local --> DEFINITELY WORKS
             int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
@@ -711,7 +713,6 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
 
 void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
   // node->visit_children(this);
-  // std::cout << " pop %ecx" << std::endl;
   std::cout << "#### MEMBER ACCESS NODE" << std::endl;
   /* cases:
   member.member
@@ -730,11 +731,11 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
       offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
       std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
       // std::cout << " push %eax" << std::endl;
-      // theoretically %eax holds member's pointer?
+      // theoretically %eax holds member's pointer
     }
     VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
     int offset2 = findOffset(this->classTable, node->identifier_2->name, tempVariableInfo.type.objectClassName);
-    std::cout << " mov 8(%eax), %eax" << std::endl;
+    // std::cout << " mov 8(%eax), %eax" << std::endl;
 
     // can u one-line the following two lines
     std::cout << " mov " << offset2 << "(%eax), %eax" << std::endl;
@@ -845,48 +846,49 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   // check constructor exists
   MethodTable* currentMethodTable = currentClassInfo.methods;
   if (currentMethodTable->find(objectTypeName) != currentMethodTable->end()) {
-  // 2. call constructor
-  std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
-  // (1) save caller registers
-  std::cout << " push %eax" << std::endl;
-  std::cout << " push %ecx" << std::endl;
-  std::cout << " push %edx" << std::endl;
+    // 2. call constructor
+    std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
+    // (1) save caller registers
+    std::cout << " push %eax" << std::endl;
+    std::cout << " push %ecx" << std::endl;
+    std::cout << " push %edx" << std::endl;
 
-  int i = 12;
-  // (2) push arguments + self pointer on the stack
-  // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
-  if(node->expression_list){
-    for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-      //visitExpressionNode((*it), this);
-      (*it)->accept(this);
-      i += 4;
+    int i = 12;
+    // (2) push arguments + self pointer on the stack
+    // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
+    if(node->expression_list){
+      for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+        //visitExpressionNode((*it), this);
+        (*it)->accept(this);
+        i += 4;
+      }
     }
-  }
-  std::cout << " mov " << i << "(%esp), %eax" << std::endl;
-  std::cout << " push %eax" << std::endl;
+    std::cout << " mov " << i << "(%esp), %eax" << std::endl;
+    std::cout << " push %eax" << std::endl;
 
-  std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
-  std::cout << " call " << objectTypeName  << "_" << objectTypeName << std::endl;
-  // only exception is Main_main but idt you ever call that
+    std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
+    std::cout << " call " << objectTypeName  << "_" << objectTypeName << std::endl;
+    // only exception is Main_main but idt you ever call that
 
 
-  std::cout << "#### NEW CALL NODE (3): constructor call - post-return sequence" << std::endl;
-  if(node->expression_list){
-    for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-      // visitExpressionNode((*it), this);
-      std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
-      // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
+    std::cout << "#### NEW CALL NODE (3): constructor call - post-return sequence" << std::endl;
+    if(node->expression_list){
+      for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+        // visitExpressionNode((*it), this);
+        std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
+        // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
+      }
     }
-  }
-  // std::cout << " move %eax, %ebx" << std::endl; // store return value in %ebx
-  // no return value
+    // std::cout << " move %eax, %ebx" << std::endl; // store return value in %ebx
+    // no return value
 
-  // restore caller-save
-  std::cout << " pop %edx" << std::endl;
-  std::cout << " pop %ecx" << std::endl;
-  std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
-  
+    // restore caller-save
+    std::cout << " pop %edx" << std::endl;
+    std::cout << " pop %ecx" << std::endl;
+    std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
+    
   }
+  std::cout << "#### Done with new" << std::endl;
   // push return to stack
   // std::cout << " push %ebx" << std::endl;
 

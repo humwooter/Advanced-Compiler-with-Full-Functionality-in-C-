@@ -10,8 +10,10 @@ Main {
 
 	    a = new classA;
 	    a.x = 5;
-	    a.y = 6;
+		print a.x;
+	    /* a.y = 6; */
 
+	    /* print a.x * a.y - 1; */
      }
 
 }
