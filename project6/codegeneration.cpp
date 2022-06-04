@@ -2,26 +2,67 @@
 
 //bool local;
 //bool param;
-int currLocalOffset = 0;
-int currParamOffset = 0;
-
+// int currLocalOffset = 0;
+// int currParamOffset = 0;
+int offset;
 // CodeGenerator Visitor Functions: These are the functions
 // you will complete to generate the x86 assembly code. Not
 // all functions must have code, many may be left empty.
 
 /* -------------------------------- helper functions ----------------------------------*/
-void setOffset(ClassTable* classTable, std::string currClassName, ClassInfo currClassInfo, int& offset) {                                                    
-  //this function should return the accumulated offset for parent classes                                                                                    
+// void addMembers(ClassTable* classTable, std::string currClassName, ClassInfo currClassInfo, ClassInfo classInfo, int& offset) {                                                    
+//   //this function should return the accumulated offset for parent classes                                                                                    
                                                                                                                                                              
-  if (classTable->find(currClassName) != classTable->end()) {                                                                                                 
-    ClassInfo superClassInfo = classTable->at(currClassInfo.superClassName);                                                                                 
-    offset += 4*(superClassInfo.membersSize);                                                                                                                
-    setOffset(classTable, currClassInfo.superClassName, superClassInfo, offset);                                                                             
-  }                                                                                                                                                          
-  else if (classTable->find(currClassName) == classTable->end()) {                                                                                           
-    return;                                                                                                                                                  
-  }                                                                                                                                                           
-}    
+//   if (classTable->find(currClassName) != classTable->end()) {                                                                                                 
+//     ClassInfo superClassInfo = classTable->at(currClassInfo.superClassName);                                                                                 
+//     //offset += 4*(superClassInfo.membersSize);
+//     //add members of superclass to currclass
+    
+//     setOffset(classTable, currClassInfo.superClassName, superClassInfo, currClassInfo,  offset);                                                                             
+//   }                                                                                                                                                          
+//   else if (classTable->find(currClassName) == classTable->end()) {                                                                                           
+//     return;                                                                                                                                                  
+//   }                                                                                                                                                           
+// }
+
+void addMembers(ClassInfo classInfo, ClassInfo superClassInfo) {
+  for (std::pair<std::string,VariableInfo> var : *(superClassInfo.members)) {
+    classInfo.members->insert(var);
+  }
+}
+void addMembers(ClassTable* classTable, std::string className, ClassInfo classInfo, ClassInfo currClassInfo) {
+  if (classTable->find(className) != classTable->end()) {
+    if (classTable->find(classInfo.superClassName) != classTable->end()) {
+        ClassInfo superClassInfo = classTable->at(classInfo.superClassName);
+        addMembers(currClassInfo, superClassInfo);
+        addMembers(classTable, classInfo.superClassName, superClassInfo, currClassInfo);
+      }
+      else {
+        return;
+      }
+  }
+  else {
+    return;
+  }
+    
+}
+void var_to_eax(std::string name, MethodInfo methodInfo, ClassInfo classInfo) {
+
+  //local variable or parameter
+  if (methodInfo.variables->find(name) != methodInfo.variables->end()) {
+    offset = methodInfo.variables->at(name).offset;
+    std::cout <<  " mov " << offset << "(%ebp), %eax" << std::endl;   
+  }
+
+  //member variable
+  else {
+    if (classInfo.members->find(name) != classInfo.members->end()) {
+      offset = classInfo.members->at(name).offset;
+      std::cout << " mov 8(%ebp), %ebx" << std::endl; //getting to self pointer
+      std::cout << " mov " << offset << "(%ebx), %eax" << std::endl; 
+    }
+  }
+}
 /* -------------------------------- helper functions ----------------------------------*/
 
 
@@ -38,47 +79,8 @@ void CodeGenerator::visitProgramNode(ProgramNode* node) {
 void CodeGenerator::visitClassNode(ClassNode* node) {
   /* STUFF FROM TYPECHECK + EXTRA STUFF FOR PROJECT 6 */
   this->currentClassName = node->identifier_1->name;
-  std::string superclass = (node->identifier_2) ? node->identifier_2->name : "";
-
-  // create ClassInfo
-  VariableTable *members = new VariableTable();
-  MethodTable *methods = new MethodTable();
-  
-
-  //loca = false;
-  //param = false;
-
-  int currentMemberOffset = 0;
-  node->identifier_1->accept(this); // class name
-
-  if (node->identifier_2) { // superclass
-    node->identifier_2->accept(this);
-  }
-
-  if (node->declaration_list) {
-    for(std::list<DeclarationNode*>::iterator iter = node->declaration_list->begin();
-        iter != node->declaration_list->end(); iter++) {
-      (*iter)->accept(this);
-    }
-  }
-  int member_size = currentMemberOffset;
-  ClassInfo current_class_info = {superclass, methods, members, member_size};
-
-  // setOffset(classTable, currentClassName, current_class_info, member_size);
-  
-  this->currentClassInfo = current_class_info;
-
-  std::pair<std::string, ClassInfo> current_class = std::make_pair(this->currentClassName, current_class_info);
-
- 
-  this->classTable->insert(current_class);
-
-  if (node->method_list) {
-    for(std::list<MethodNode*>::iterator iter = node->method_list->begin();
-        iter != node->method_list->end(); iter++) {
-      (*iter)->accept(this);
-    }
-  }
+  this->currentClassInfo = (*(this->classTable))[currentClassName];
+  node->visit_children(this);
   /* STUFF FROM TYPECHECK + EXTRA STUFF FOR CLASS NODE */       
   
 }
@@ -87,6 +89,10 @@ void CodeGenerator::visitMethodNode(MethodNode* node) {
     // WRITEME: Replace with code if necessary
     std::cout << "#### METHOD NODE (1): method prologue" << std::endl;
     std::string methodName = node->identifier->name;
+    this->currentMethodName = methodName;
+    this->currentMethodInfo = (*((this->currentClassInfo).methods))[methodName];
+
+    
     std::string methodLabel = currentClassName + "_" + methodName + ":"; 
     // push old %ebp
     std::cout << methodLabel << std::endl; 
@@ -147,10 +153,23 @@ void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
 
 void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
   // WRITEME: Replace with code if necessary
-  // std::cout << "# ASSIGNMENT" << std::endl;
-  // node->visit_children(this);
-  // std::cout << "  pop %eax" << std::endl;
-  // std::cout <<  "  mov %eax, " << offset << "(%ebp)" << std::endl;
+  std::cout << "# ASSIGNMENT" << std::endl; 
+    node->visit_children(this);
+
+  if (currentMethodInfo.variables->find(node->identifier_1->name) != currentMethodInfo.variables->end()) {
+    offset = currentMethodInfo.variables->at(node->identifier_1->name).offset;
+    std::cout << "# offset is: " << offset << std::endl; 
+  }
+  else {
+    if (currentClassInfo.members->find(node->identifier_1->name) != currentClassInfo.members->end()) {
+      offset = currentClassInfo.members->at(node->identifier_1->name).offset;
+   std::cout << "# offset is: " << offset << std::endl; 
+    }
+  }
+   
+  std::cout << "# ASSIGNMENT" << std::endl;
+  std::cout << "  pop %eax" << std::endl;
+  std::cout <<  " mov %eax, " << offset << "(%ebp)" << std::endl;
 }
 
 void CodeGenerator::visitCallNode(CallNode* node) {
@@ -161,45 +180,51 @@ void CodeGenerator::visitIfElseNode(IfElseNode* node) { //could be wrong
   // WRITEME: Replace with code if necessary
   std::cout << "# IF ELSE" << std::endl;
   node->expression->accept(this);
+  bool else_taken = node->statement_list_2;
 
-  std::string ifLabel = "label_" + std::to_string(nextLabel()) + ":";
-  std::string elseLabel = "label_" + std::to_string(nextLabel()) + ":";
-  std::string after_if_elseLabel = "label_" + std::to_string(nextLabel());   
+  std::string ifLabel = "label_" + std::to_string(nextLabel()) ;
+  std::string elseLabel = "";
+  if (else_taken) elseLabel = "label_" + std::to_string(nextLabel()) ;
+  std::string after_if_elseLabel = "label_" + std::to_string(nextLabel()) ;   
   std::cout << "  pop %eax" << std::endl; //reg1 (check)
    
   std::cout << "  cmp $0, %eax" << std::endl;
-  std::cout << "  je " << elseLabel << std::endl;
-  std::cout << ifLabel << std::endl; 
+  if (else_taken) std::cout << "  je " << elseLabel << std::endl;
+  else  std::cout << "  je " << after_if_elseLabel  << std::endl; 
+  std::cout << ifLabel << ":" << std::endl; 
   for (std::list<StatementNode*>::iterator it = node->statement_list_1->begin(); it != node->statement_list_1->end(); it++) {
     (*it)->accept(this);
   }
-  std::cout << "  jne " << after_if_elseLabel << std::endl;
-
-  std::cout << elseLabel << std::endl; 
-  for (std::list<StatementNode*>::iterator it = node->statement_list_2->begin(); it != node->statement_list_2->end(); it++) {
-    (*it)->accept(this);
+  std::cout << "  jmp " << after_if_elseLabel << std::endl;
+  
+  if (else_taken)  {
+    std::cout << elseLabel << ":" << std::endl; 
+    for (std::list<StatementNode*>::iterator it = node->statement_list_2->begin(); it != node->statement_list_2->end(); it++) {
+      (*it)->accept(this);
+    }
   }
-  std::cout << after_if_elseLabel << std::endl; 
+  
+  std::cout << after_if_elseLabel << ":" << std::endl; 
 }
 
 void CodeGenerator::visitWhileNode(WhileNode* node) { //might be wrong
   //WRITEME: Replace with code if necessary
   std::cout << "# WHILE" << std::endl;
-  std::string whileLabel = "label_" + std::to_string(nextLabel()) + ":";
-  std::string after_whileLabel = "label_" + std::to_string(nextLabel()) + ":";
+  std::string whileLabel = "label_" + std::to_string(nextLabel()) ;
+  std::string after_whileLabel = "label_" + std::to_string(nextLabel()) ;
  
   
-  std::cout << whileLabel << std::endl; 
+  std::cout << whileLabel << ":" << std::endl; 
   node->expression->accept(this);
   std::cout << "  pop %eax" << std::endl; //reg1 (check) 
-  std::cout << "  cmp $0, $eax" << std::endl; //comparison statement at beginning of while loop
+  std::cout << "  cmp $0, %eax" << std::endl; //comparison statement at beginning of while loop
   std::cout << "  je " << after_whileLabel << std::endl; //jumping to body of while loop
   
     for (std::list<StatementNode*>::iterator it = node->statement_list->begin(); it != node->statement_list->end(); it++) {
       (*it)->accept(this);
     }
-  std::cout << " jmp " << whileLabel << std::endl;
-  std::cout << after_whileLabel << std::endl; 
+  std::cout << " jmp " << whileLabel <<  std::endl;
+  std::cout << after_whileLabel << ":" << std::endl; 
 }
 
 void CodeGenerator::visitPrintNode(PrintNode* node) {
@@ -213,10 +238,10 @@ void CodeGenerator::visitPrintNode(PrintNode* node) {
 void CodeGenerator::visitDoWhileNode(DoWhileNode* node) {
   // WRITEME: Replace with code if necessary
   std::cout << "# DO WHILE" << std::endl;
-  std::string do_whileLabel = "label_" + std::to_string(nextLabel()) + ":";
-  std::string after_whileLabel = "label_" + std::to_string(nextLabel()) + ":";   
+  std::string do_whileLabel = "label_" + std::to_string(nextLabel()) ;
+  //std::string after_whileLabel = "label_" + std::to_string(nextLabel()) ;   
  
-  std::cout << do_whileLabel << std::endl; 
+  std::cout << do_whileLabel << ":" << std::endl; 
   for (std::list<StatementNode*>::iterator it = node->statement_list->begin(); it != node->statement_list->end(); it++) {
     (*it)->accept(this);
   }
@@ -402,34 +427,42 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
 
 void CodeGenerator::visitVariableNode(VariableNode* node) {
   // WRITEME: Replace with code if necessary
+  std::cout << "# VARIABLE" << std::endl;
+  std::string var_name = node->identifier->name;
+
+  var_to_eax(var_name, this->currentMethodInfo, this->currentClassInfo);
+  std::cout << " push %eax" << std::endl; 
 }
 
 void CodeGenerator::visitIntegerLiteralNode(IntegerLiteralNode* node) {
   // WRITEME: Replace with code if necessary
   node->visit_children(this);
   //std::string action = "mov $" + node->integer->value + ", eax";
-  std::string action = "";
-  action += " mov $";
-  action += std::to_string(node->integer->value);
-  action += ", %eax";
+  // std::string action = "";
+  // action += " mov $";
+  // action += std::to_string(node->integer->value);
+  // action += ", %eax";
   
   std::cout << " #INTEGER_LITERAL" << std::endl; 
-  std::cout << action << std::endl;
-  std::cout << " push %eax" << std::endl; 
+  //std::cout << action << std::endl;
+  std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
+  //std::cout << " push %eax" << std::endl; 
 }
 
 void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
   // WRITEME: Replace with code if necessary
   node->visit_children(this);
   //std::string action = "mov $" + (node->integer->value) + ", eax";
-  std::string action = "";
-  action += " mov $";
-  action += std::to_string(node->integer->value);
-  action += ", %eax";
+  // std::string action = "";
+  // action += " mov $";
+  // action += std::to_string(node->integer->value);
+  // action += ", %eax";
   
   std::cout << " #BOOLEAN_LITERAL" << std::endl; 
-  std::cout << action << std::endl; 
-  std::cout << " push %eax" << std::endl;  
+  // std::cout << action << std::endl; 
+  // std::cout << " push %eax" << std::endl;
+  std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
+  
 }
 
 void CodeGenerator::visitNewNode(NewNode* node) {
