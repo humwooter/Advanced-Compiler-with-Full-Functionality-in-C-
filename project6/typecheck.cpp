@@ -740,8 +740,11 @@ void TypeCheck::visitNewNode(NewNode* node) {
   }
 
   ClassInfo class_info = this->classTable->at(constructor_name);
-  MethodInfo method_info = class_info.methods->at(constructor_name);
-  argumentsHelper(method_info.parameters, node->expression_list);
+
+  if (class_info.methods->find(constructor_name) != class_info.methods->end()) {
+      MethodInfo method_info = class_info.methods->at(constructor_name);
+      argumentsHelper(method_info.parameters, node->expression_list);
+  }
 }
 
 void TypeCheck::visitIntegerTypeNode(IntegerTypeNode* node) {

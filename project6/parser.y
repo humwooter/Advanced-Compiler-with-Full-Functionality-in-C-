@@ -261,6 +261,7 @@ Expression:
 | NEW Identifier  { $$ = new NewNode($2, NULL); }
 | NEW Identifier OPEN_PARENTHESES Arguments CLOSE_PARENTHESES { $$ = new NewNode($2, $4); }
 | NEW Identifier OPEN_PARENTHESES CLOSE_PARENTHESES { $$ = new NewNode($2, NULL); }
+| NEW Identifier { $$ = new NewNode($2, NULL); }
 ;
 
 Variable:

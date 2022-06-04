@@ -9,10 +9,13 @@ Main {
      	    classA a;
 
 	    a = new classA;
-	    a.x = 5;
-	    a.y = 6;
+         a.x = 5;
+         a.y = 6;
 
-	    print a.x * a.y - 1;
+         print a.x;
+         print a.y;
+
+         print a.x * a.y - 1;
      }
 
 }

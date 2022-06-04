@@ -6,12 +6,12 @@ classA {
 
        doAll() -> none {
        	   integer x, y;
-	   x = 1;
-	   y = 2;
+            x = 1;
+            y = 2;
 
-           print f0(5);
-	   print f0(6);
-	   print x + y;
+            print f0(5);
+            print f0(6);
+            print x + y;
        }
 
 }

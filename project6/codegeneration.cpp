@@ -11,11 +11,16 @@ int offset;
 
 /* -------------------------------- helper functions ----------------------------------*/
 
+/*
 void addMembers(ClassInfo classInfo, ClassInfo superClassInfo) {
   for (std::pair<std::string,VariableInfo> var : *(superClassInfo.members)) {
     classInfo.members->insert(var);
+    classInfo.membersSize += 4;
   }
 }
+ */
+
+ /*
 void addMembers(ClassTable* classTable, std::string className, ClassInfo classInfo, ClassInfo currClassInfo) {
   if (classTable->find(className) != classTable->end()) {
     if (classTable->find(classInfo.superClassName) != classTable->end()) {
@@ -32,6 +37,8 @@ void addMembers(ClassTable* classTable, std::string className, ClassInfo classIn
   }
     
 }
+*/
+
 void var_to_eax(std::string name, MethodInfo methodInfo, ClassInfo classInfo) {
 
   //local variable or parameter
@@ -61,6 +68,7 @@ void var_to_eax(std::string name, ClassInfo classInfo) {
     }
 }
 
+/*
 void setOffset(ClassTable* classTable, std::string currClassName, ClassInfo currClassInfo, int& offset) {                                                    
   //this function should return the accumulated offset for parent classes                                                                                    
                                                                                                                                                              
@@ -73,16 +81,50 @@ void setOffset(ClassTable* classTable, std::string currClassName, ClassInfo curr
     return;                                                                                                                                                  
   }                                                                                                                                                           
 }
+*/
+
+// laszlo
 
 // could prob rewrite using currentMethodInfo lmao
+/*
 bool isLocal(ClassTable* classTable, std::string memberName, std::string methodName, std::string className) {
     VariableTable* currentVariableTable = (((classTable->at(className)).methods)->at(methodName)).variables;
     return (currentVariableTable->find(memberName) != currentVariableTable->end());
 }
+*/
 
 bool isLocal(std::string memberName, MethodInfo methodInfo) {
     VariableTable* currentVariableTable = methodInfo.variables;
     return (currentVariableTable->find(memberName) != currentVariableTable->end());
+}
+
+int findOffset(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable *classTable) {
+  if (isLocal(memberName, methodInfo)) {
+    return ((methodInfo.variables)->at(memberName)).offset;
+  } else {
+    int tempOffset = 0;
+    ClassInfo tempClassInfo = classTable->at(className);
+    VariableTable *tempVariableTable = tempClassInfo.members;
+
+    // find out which class contains the member
+    while (tempVariableTable->find(memberName) == tempVariableTable->end()) {
+      tempClassInfo = classTable->at(tempClassInfo.superClassName);
+      tempVariableTable = tempClassInfo.members;
+    }
+
+    // add local offset of member within its direct class
+    tempOffset += (tempVariableTable->at(memberName)).offset;
+
+    // recursively traverse superclasses and accumulate membersize of all superclasses
+    std::string tempSuperclassName = tempClassInfo.superClassName;
+    while (tempSuperclassName != "") {
+      tempClassInfo = classTable->at(tempSuperclassName);
+      tempOffset += tempClassInfo.membersSize;
+      tempSuperclassName = tempClassInfo.superClassName;
+    }
+
+    return tempOffset;
+  }
 }
 
 // can prob rewrite with classInfo instead of className
@@ -112,6 +154,42 @@ int findOffset(ClassTable* classTable, std::string memberName, std::string class
   return tempOffset;
 }
 
+// address to ebx
+void access(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
+  int offset;
+  if (isLocal(memberName, methodInfo)) {
+    // std::cout << "#### local!" << std::endl;
+    offset = ((methodInfo.variables)->at(memberName)).offset;
+    std::cout << " mov " << offset << "(%ebp), %ebx" << std::endl;
+  } else {
+    offset = findOffset(classTable, memberName, className);
+    std::cout << " mov 8(%ebp), %edx" << std::endl;
+    std::cout << " mov " << offset << "(%edx), %ebx" << std::endl;
+  }
+}
+
+/*
+// eax to address (assume already in eax)
+void reverse_access(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
+  int offset;
+  if (isLocal(memberName, methodInfo)) {
+    offset = ((methodInfo.variables)->at(memberName)).offset;
+    std::cout << " mov %eax, " << offset << "(%ebp)" << std::endl;
+  } else {
+    offset = findOffset(classTable, memberName, className);
+    std::cout << " mov 8(%ebp), %edx" << std::endl; // NEEL correct?
+    std::cout << " mov %eax, " << offset << "(%edx)" << std::endl;
+  }
+}
+
+// eax to address (assume already in eax)
+void reverse_access(std::string memberName, std::string className, ClassTable* classTable) {
+  int offset;
+  offset = findOffset(classTable, memberName, className);
+  std::cout << " mov 8(%ebp), %edx" << std::endl; // NEEL correct?
+  std::cout << " mov %eax, " << offset << "(%edx)" << std::endl;
+}
+*/
 
 // can prob replace className with currentClassInfo
 VariableInfo findVariableInfo(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
@@ -222,33 +300,25 @@ void CodeGenerator::visitProgramNode(ProgramNode* node) {
 }
 
 void CodeGenerator::visitClassNode(ClassNode* node) {
-  /* STUFF FROM TYPECHECK + EXTRA STUFF FOR PROJECT 6 */
   this->currentClassName = node->identifier_1->name;
-  this->currentClassInfo = (*(this->classTable))[currentClassName];
+  this->currentClassInfo = this->classTable->at(this->currentClassName);
   node->visit_children(this);
-  /* STUFF FROM TYPECHECK + EXTRA STUFF FOR CLASS NODE */       
-  
 }
 
 void CodeGenerator::visitMethodNode(MethodNode* node) {
-    // WRITEME: Replace with code if necessary
     std::cout << "#### METHOD NODE (1): method prologue" << std::endl;
-    std::string methodName = node->identifier->name;
-    this->currentMethodName = methodName;
-    this->currentMethodInfo = (*((this->currentClassInfo).methods))[methodName];
-
+    this->currentMethodName = node->identifier->name;
+    this->currentMethodInfo = (currentClassInfo.methods)->at(this->currentMethodName);
     
-    std::string methodLabel = currentClassName + "_" + methodName + ":"; 
+    std::cout << this->currentClassName << "_" << this->currentMethodName << ":";
     // push old %ebp
-    std::cout << methodLabel << std::endl; 
     std::cout << " push %ebp" << std::endl;
     // Set new %ebp (may want to set to current %esp)
     std::cout << " mov %esp, %ebp" << std::endl;
     // allocate space for local variables
     //      subtract from stack pointer
-    //      look into localSize of MethodInfo  MARKER: ask katya about this
+    //      look into localSize of MethodInfo
     std::cout << " sub $" << currentMethodInfo.localsSize << ", %esp" << std::endl;
-        // MARKER: does localSize get set before this (i.e. not in the visit_children called below?)
     // save callee-save registers
     /* SPECS: The callee save registers are: %ebx, %esi, and %edi. */
     /* CORNELL: (callee) ebx, esi, edi, ebp, esp */
@@ -269,21 +339,19 @@ void CodeGenerator::visitMethodNode(MethodNode* node) {
     // (2) deallocate local space by moving stack pointer (%esp) to base pointer (%ebp)
     std::cout << " mov %ebp, %esp" << std::endl;
     // (3) restore base pointer by popping old %ebp from the stack
-    // (4) return using return address (ret instruction)
     std::cout << " pop %ebp" << std::endl;
+    // (4) return using return address (ret instruction)
     std::cout << " ret" << std::endl; // does this require operands?
     // N.B. Store the return value in %eax before Epilogue phase
 }
 
 void CodeGenerator::visitMethodBodyNode(MethodBodyNode* node) {
-    // WRITEME: Replace with code if necessary
   node->visit_children(this);
   if (!node->returnstatement) std::cout << " xor %eax, %eax" << std::endl; 
 }
 
 void CodeGenerator::visitParameterNode(ParameterNode* node) {
-    // WRITEME: Replace with code if necessary
-  node->visit_children(this);
+    // node->visit_children(this); // necessary?
 }
 
 void CodeGenerator::visitDeclarationNode(DeclarationNode* node) {
@@ -292,15 +360,78 @@ void CodeGenerator::visitDeclarationNode(DeclarationNode* node) {
 
 void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
   // WRITEME: Replace with code if necessary
-  std::cout << "#RETURN_STATEMENT" << std::endl;
+    std::cout << "#RETURN_STATEMENT" << std::endl;
     node->visit_children(this);
 }
 
 void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
+
+  // like member access, except instead of pushing something from an address to the stack, you pop something from the stack to an address
+
+  // pop offset(%eax) /n
+
   // WRITEME: Replace with code if necessary
   std::cout << "# ASSIGNMENT" << std::endl; 
-    node->visit_children(this);
+  node->visit_children(this);
+  // std::cout << " pop %eax" << std::endl;
 
+  // 8(%ebp) is address of first member (offset 0)
+  // so we want to move 8(%ebp) into something like ebx
+  // then we want to move eax into offset(ebx)
+
+  if (node->identifier_2) {
+    // VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+    // std::string tempClassName = tempVariableInfo.type.objectClassName;
+    // int offset = findOffset(this->classTable, node->identifier_2->name, this->currentClassName);
+    if (isLocal(node->identifier_1->name, this->currentMethodInfo)) { std::cout << "#### my friends!!"; }
+    /*
+    if (isLocal(node->identifier_1->name, this->currentMethodInfo)) {
+      int offset = ((this->currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
+      std::cout << " mov " << offset << "(%ebp), %ebx" << std::endl;
+
+      VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+      std::string tempClassName = tempVariableInfo.type.objectClassName;
+    
+      offset = findOffset(this->classTable, node->identifier_2->name, tempClassName);
+      std::cout << " pop " << offset << "(%ebx)" << std::endl;
+  
+    } else {
+      int offset = findOffset(this->classTable, node->identifier_2->name, this->currentClassName);
+      std::cout << " mov 8(%ebp), %edx" << std::endl;
+      std::cout << " mov " << offset << "(%edx), %ebx" << std::endl;
+
+      VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+      std::string tempClassName = tempVariableInfo.type.objectClassName;
+    
+      offset = findOffset(this->classTable, node->identifier_2->name, tempClassName);
+      std::cout << " pop " << offset << "(%ebx)" << std::endl;
+
+    }
+    */
+
+    /*
+    // address to ebx
+    access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+    
+    VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+    std::string tempClassName = tempVariableInfo.type.objectClassName;
+    
+    int offset = findOffset(this->classTable, node->identifier_2->name, tempClassName);
+    std::cout << " pop " << offset << "(%ebx)" << std::endl;
+    */
+  } else { // hard coding bc im tired and idk what's going on
+      // access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+      if (isLocal(node->identifier_1->name, this->currentMethodInfo)) {
+        int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+        std::cout << " pop " << offset << "(%ebp)" << std::endl;
+      } else {
+          access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+          int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+          std::cout << " pop " << offset << "(%ebx)" << std::endl;
+      }
+  }
+  
+  /*
   if (currentMethodInfo.variables->find(node->identifier_1->name) != currentMethodInfo.variables->end()) {
     offset = currentMethodInfo.variables->at(node->identifier_1->name).offset;
     std::cout << "# offset is: " << offset << std::endl; 
@@ -308,13 +439,11 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
   else {
     if (currentClassInfo.members->find(node->identifier_1->name) != currentClassInfo.members->end()) {
       offset = currentClassInfo.members->at(node->identifier_1->name).offset;
-   std::cout << "# offset is: " << offset << std::endl; 
+      std::cout << "# offset is: " << offset << std::endl; 
     }
   }
-   
-  std::cout << "# ASSIGNMENT" << std::endl;
-  std::cout << "  pop %eax" << std::endl;
-  std::cout <<  " mov %eax, " << offset << "(%ebp)" << std::endl;
+  */
+  // std::cout << " mov %eax, " << offset << "(%ebp)" << std::endl;
 }
 
 void CodeGenerator::visitCallNode(CallNode* node) {
@@ -532,12 +661,6 @@ void CodeGenerator::visitNegationNode(NegationNode* node) {
 
 void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
   // WRITEME: Replace with code if necessary
-  // this->currentMethodName = node->identifier_1->name;
-  // if (this->currentClassInfo.methods->find(this->currentMethodName) != this->currentClassInfo.methods->end()) {
-  //   this->currentMethodInfo = this->currentClassInfo.methods->at(this->currentMethodName); // typechecker checks that this exists in table??
-  // }
-  // ADD object.method case
-  // ^ needs to be moved
 
   // in general may have to debug currentMethodName and currentMethodInfo and make sure they're doing what we want them to do
 
@@ -555,71 +678,48 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
             (*it)->accept(this);
         }
     }
-    // ADD object.method case:
-    // object (identifier_1->name) will be in variabletable of method
-    // does that mean i have to change the currentMethodName and currentMethodInfo setting to be after this? bc i still need currentMethodInfo for caller frame to find this self ptr?
-
-  // bool isLocal(ClassTable* classTable, std::string memberName, std::string methodName, std::string className);
+    
+    // self pointer
     if(node->identifier_2) {
-      // if (isLocal(this->classTable, identifier_1->name, this->currentMethodName, this->currentClassName)) // need to implement isLocal
-      // bool isLocal(std::string memberName, MethodInfo methodInfo) {
-      int objectOffset;
+      int offset;
       if (isLocal(node->identifier_1->name, currentMethodInfo))
       {
         // get local offset
-        objectOffset = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
+        offset = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
       } else { // class or superclass
-        // self pointer move 8(ebp) to ebx
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
-        // int findOffset(ClassTable* classTable, std::string memberName, std::string className) {
-        objectOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
-        std::cout << " mov" << objectOffset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
+        offset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
+        std::cout << " mov " << offset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
         std::cout << " push %eax" << std::endl;
       }
     } else {
       std::cout << " push 8(%ebp)" << std::endl;
     }
 
-// ignore the following notes I took at OH. skip to #### METHOD CALL NODE (2)
-// object.method
-// case local object  offset ebp
-// case class or superclass member: member offsets
-// first get pointer to heap, then need to calculate offset
-
-/* helper function implementation  for calculating objectOffset (call for calculating that)
-1. superclass offset
-2. local member offset
-
-membername: which class contains member, while loop.
-get local offset in that class for that member
-check whether that class has superclass, accumulate recursively superclass membersize
-*/
-
-  // this->currentMethodName = node->identifier_1->name;
-  // if (this->currentClassInfo.methods->find(this->currentMethodName) != this->currentClassInfo.methods->end()) {
-  //   this->currentMethodInfo = this->currentClassInfo.methods->at(this->currentMethodName); // typechecker checks that this exists in table??
-  // }
-
-
+    // lmao
+    // std::string saveMethodName = this->currentMethodName;
+    // MethodInfo saveMethodInfo = this->currentMethodInfo;
 
     std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
-    if (node->identifier_2) { // must be object via TypeCheck
-      // need to find class name from identifier_1->name, which is either a local variable/parameter (find in currentMethodNodeInfo VariableTable) or class or superclass member
-      // method name is just identifier_2->name
-      // VariableInfo->CompoundType type->std::string objectClassName;
+    if (node->identifier_2) {
 
-      // VariableInfo findVariableInfo(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
+      // std::string saveClassName = this->currentClassName;
+      // ClassInfo saveClassInfo = this->currentClassInfo;
+
       VariableInfo memberInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-      // need to set currentMethodName and currentMethodInfo
       std::string tempClassName = memberInfo.type.objectClassName;
-      this->currentMethodName = node->identifier_2->name;
-      this->currentMethodInfo = ((this->classTable->at(tempClassName)).methods)->at(this->currentMethodName);
-      
+
+      // this->currentClassName = tempClassName;
+      // this->currentClassInfo = this->classTable->at(tempClassName);
+
       std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
+
+      // this->currentClassName = saveClassName;
+      // this->currentClassInfo = saveClassInfo;
     } else {
       // ADD superclass method
-      this->currentMethodName = node->identifier_1->name;
-      this->currentMethodInfo = findMethodInfo(this->currentMethodName, this->currentClassName, this->classTable);
+      // this->currentMethodName = node->identifier_1->name;
+      // this->currentMethodInfo = findMethodInfo(this->currentMethodName, this->currentClassName, this->classTable);
       // this->currentMethodInfo = (this->currentClassInfo.methods)->at(this->currentMethodName);
       
       // MethodInfo findMethodInfoFromMethodName(std::string methodName, std::string className, ClassTable* classTable) 
@@ -627,6 +727,9 @@ check whether that class has superclass, accumulate recursively superclass membe
       std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
     
     }
+
+    // this->currentMethodName = saveMethodName;
+    // this->currentMethodInfo = saveMethodInfo;
 
 
     std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
@@ -648,13 +751,22 @@ check whether that class has superclass, accumulate recursively superclass membe
     std::cout << " push %ebx" << std::endl;
 
     // do we need to reset currentMethodName and currentMethodInfo?
+    // ^ ans idts, it only matters for %
 }
 
 void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
+    // VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+    // std::string currentClassName = tempVariableInfo.type.objectClassName;
+    // var_to_eax(node->identifier_2->name, currentClassInfo);
+    // std::cout << " push %eax" << std::endl; 
+
+    // address to eax
+    access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+    
     VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
     std::string currentClassName = tempVariableInfo.type.objectClassName;
-    var_to_eax(node->identifier_2->name, currentClassInfo);
-    std::cout << " push %eax" << std::endl; 
+    int offset = findOffset(this->classTable, node->identifier_2->name, this->currentClassName);
+    std::cout << " push " << offset << "(%eax)" << std::endl;
 }
 
 void CodeGenerator::visitVariableNode(VariableNode* node) {
@@ -663,7 +775,21 @@ void CodeGenerator::visitVariableNode(VariableNode* node) {
   std::cout << "# VARIABLE" << std::endl;
   std::string var_name = node->identifier->name;
 
+  /*
+  // int findOffset(ClassTable* classTable, std::string memberName, std::string className)
+  int objectOffset;
+  if (isLocal(var_name, currentMethodInfo)) {
+    std::cout << "# IS LOCAL: " << var_name << std::endl;
+    objectOffset = ((currentMethodInfo.variables)->at(var_name)).offset;
+  } else {
+    // objectOffset = findOffset(this->classTable, var_name, this->currentClassName);
+  }
+  std::cout << " mov 8(%ebp), %ebx" << std::endl; //getting to self pointer
+  std::cout << " mov " << objectOffset << "(%ebx), %eax" << std::endl; 
+  */
+  
   var_to_eax(var_name, this->currentMethodInfo, this->currentClassInfo);
+  // idk if thi
   std::cout << " push %eax" << std::endl; 
 }
 
@@ -688,7 +814,7 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   // 1. allocate space
   std::string objectTypeName = node->identifier->name;
   int size = findClassSize(objectTypeName, this->classTable);
-  
+
   std::cout << " push $" << size << std::endl;
   std::cout << " call malloc" << std::endl;
   std::cout << " add $4, %esp" << std::endl;
@@ -696,6 +822,9 @@ void CodeGenerator::visitNewNode(NewNode* node) {
 
   // ^ i think %eax is the self pointer that i can use when calling constructor?
 
+  // check constructor exists
+  MethodTable* currentMethodTable = currentClassInfo.methods;
+  if (currentMethodTable->find(objectTypeName) != currentMethodTable->end()) {
   // 2. call constructor
   std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
   // (1) save caller registers
@@ -703,19 +832,21 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   std::cout << " push %ecx" << std::endl;
   std::cout << " push %edx" << std::endl;
 
+  int i = 12;
   // (2) push arguments + self pointer on the stack
   // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
   if(node->expression_list){
     for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
       //visitExpressionNode((*it), this);
       (*it)->accept(this);
+      i += 4;
     }
   }
-  // self pointer?
+  std::cout << " mov " << i << "(%esp), %eax" << std::endl;
   std::cout << " push %eax" << std::endl;
 
   std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
-  std::cout << objectTypeName  << "_" << objectTypeName << std::endl;
+  std::cout << " call " << objectTypeName  << "_" << objectTypeName << std::endl;
   // only exception is Main_main but idt you ever call that
 
 
@@ -734,7 +865,8 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   std::cout << " pop %edx" << std::endl;
   std::cout << " pop %ecx" << std::endl;
   std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
- 
+  
+  }
   // push return to stack
   // std::cout << " push %ebx" << std::endl;
 
@@ -742,7 +874,6 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   
   // constructors may be chained, but this must be explicitly done by the programmer
   // ^ going to assume this is handled by methodnode
-
 }
 
 void CodeGenerator::visitIntegerTypeNode(IntegerTypeNode* node) {
