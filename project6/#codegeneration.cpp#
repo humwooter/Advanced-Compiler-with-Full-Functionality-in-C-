@@ -550,10 +550,6 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
     this->currentMethodInfo = ((this->classTable->at(tempClassName)).methods)->at(this->currentMethodName);
     std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
   } else {
-
-    // this->currentMethodName = node->identifier_1->name;
-    // this->currentMethodInfo = (this->currentClassInfo.methods)->at(this->currentMethodName);
-    // std::cout << " call " << this->currentClassName << "_" << node->identifier_1->name << std::endl;
     this->currentMethodName = node->identifier_1->name;
       this->currentMethodInfo = findMethodInfo(this->currentMethodName, this->currentClassName, this->classTable);
       std::string tempClassName = findClassNameFromMethodName(this->currentMethodName, this->currentClassName, this->classTable);
