@@ -367,7 +367,7 @@ void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
 
 void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
   node->visit_children(this);
-  std::cout << " pop %eax" << std::endl;
+  std::cout << " pop %ecx" << std::endl;
   // std::cout << "#### " << this->currentClassName << "_" << this->currentMethodName << std::endl;
   std::cout << "#### ASSIGNMENT NODE" << std::endl;
   /* cases:
@@ -378,38 +378,59 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
   */
 
   // attempt three thanks zheng
-  /*
+  // /*
   if(node->identifier_2) {
       int offset;
-      if (isLocal(node->identifier_1->name, currentMethodInfo))
+      if (isLocal(node->identifier_1->name, currentMethodInfo)) // local.member
       {
-        // get local offset
         offset = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
-        std::cout << " mov " << offset << "(%ebp), %eax" << std::endl; // this
-        // std::cout << " push %eax" << std::endl; // this
-        std::cout << " mov %ecx, %eax" << std::endl;
-      } else { // class or superclass
+        std::cout << " mov " << offset << "(%ebp), %eax" << std::endl;
+        // std::cout << " push %eax" << std::endl;
+        // i believe %eax holds local's pointer
+
+
+        // std::cout << " mov %ecx, %eax" << std::endl;
+      } else { // class or superclass // member.member
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
         offset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
         std::cout << " mov " << offset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
         // std::cout << " push %eax" << std::endl;
-        std::cout << " mov %ecx, %eax" << std::endl;
+        // theoretically %eax holds member's pointer?
+
+        // std::cout << " mov %ecx, %eax" << std::endl;
       }
+      VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+      int offset2 = findOffset(this->classTable, node->identifier_2->name, tempVariableInfo.type.objectClassName);
+      std::cout << " mov 8(%eax), %ebx" << std::endl;
+      std::cout << " mov " << offset << "(%ebx), %eax" << std::endl;
+      std::cout << " mov %ecx, %eax" << std::endl;
+        
+        /* Variableinfo
+        if (!(isLocal(node->identifier->name, this->currentMethodInfo))) { 
+        int memberOffset = findOffset(this->classTable, node->identifier->name, this->currentClassName);
+        std::cout << "   mov " << "8(%ebp), %eax" << std::endl; 
+        std::cout << "   mov " << memberOffset << "(%eax), %eax" << std::endl;
+        std::cout << "   push %eax" << std::endl;
+        } else { // local		
+            std::cout << "   mov " << currentMethodInfo.variables->at(node->identifier->name).offset << "(%ebp), %eax" << std::endl;
+            std::cout << "   push %eax" << std::endl; 
+        } */
+
     } else {
         // std::cout << " push 8(%ebp)" << std::endl;
-        if (isLocal(node->identifier_1->name, this->currentMethodInfo)) {
+        if (isLocal(node->identifier_1->name, this->currentMethodInfo)) { // local
             int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-            std::cout << " mov %eax, " << offset << "(%ebp)" << std::endl;
+            std::cout << " mov %ecx, " << offset << "(%ebp)" << std::endl;
             // does not work idk why: access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);      
-        } else {
+        } else { // member
             access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
             int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-            std::cout << " mov %eax, " << offset << "(%ebx)" << std::endl;
+            std::cout << " mov %ecx, " << offset << "(%ebx)" << std::endl;
         }
     }
-    */
+    // */
 
-  // ATTEMPT 2
+  /* ATTEMPT 2
   if (node->identifier_2) { // same as memberaccess except you push (mov) instead of pop
     std::cout << "#### ASSIGNMENT NODE WITH IDENTIFIER_2" << std::endl;
     access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
@@ -430,6 +451,7 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
         std::cout << " mov %eax, " << offset << "(%ebx)" << std::endl;
     }
   }
+  */
 
   // old
 
