@@ -14,6 +14,7 @@ int offset;
 void addMembers(ClassInfo classInfo, ClassInfo superClassInfo) {
   for (std::pair<std::string,VariableInfo> var : *(superClassInfo.members)) {
     classInfo.members->insert(var);
+    classInfo.membersSize += 4;
   }
 }
 void addMembers(ClassTable* classTable, std::string className, ClassInfo classInfo, ClassInfo currClassInfo) {
@@ -208,6 +209,18 @@ int findClassSize(std::string className, ClassTable* classTable) {
   return size;
 }
 
+bool has_constructor(ClassTable* classTable, std::string className) {
+  bool valid = false;
+  if (classTable->find(className) == classTable->end()) return false;
+
+  else {
+    ClassInfo currClassInfo = (*classTable)[className];
+    MethodTable *currMethods = currClassInfo.methods;
+    if (currMethods->find(className) != currMethods->end()) return true;
+  }
+  return false;
+}
+
 /* -------------------------------- helper functions ----------------------------------*/
 
 
@@ -293,6 +306,7 @@ void CodeGenerator::visitDeclarationNode(DeclarationNode* node) {
 void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
   // WRITEME: Replace with code if necessary
   std::cout << "#RETURN_STATEMENT" << std::endl;
+  node->visit_children(this);
   
 }
 
@@ -552,7 +566,7 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
       } else {
       std::cout << " mov 8(%ebp), %ebx" << std::endl;
       objectOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
-      std::cout << " mov" << objectOffset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
+      std::cout << " mov " << objectOffset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
       std::cout << " push %eax" << std::endl;
     }
   } else {
@@ -633,17 +647,13 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   std::cout << " add $4, %esp" << std::endl;
   std::cout << " push %eax" << std::endl; // is this ok to be called here?
 
-  // ^ i think %eax is the self pointer that i can use when calling constructor?
-
-  // 2. call constructor
+  if (has_constructor(this->classTable, objectTypeName)) {
   std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
   // (1) save caller registers
   std::cout << " push %eax" << std::endl;
   std::cout << " push %ecx" << std::endl;
   std::cout << " push %edx" << std::endl;
 
-  // (2) push arguments + self pointer on the stack
-  // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
   if(node->expression_list){
     for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
       //visitExpressionNode((*it), this);
@@ -655,9 +665,7 @@ void CodeGenerator::visitNewNode(NewNode* node) {
 
   std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
   std::cout << objectTypeName  << "_" << objectTypeName << std::endl;
-  // only exception is Main_main but idt you ever call that
-
-
+ 
   std::cout << "#### METHOD CALL NODE (3): constructor call - post-return sequence" << std::endl;
   if(node->expression_list){
     for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
@@ -666,22 +674,10 @@ void CodeGenerator::visitNewNode(NewNode* node) {
       // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
     }
   }
-  // std::cout << " move %eax, %ebx" << std::endl; // store return value in %ebx
-  // no return value
-
-  // restore caller-save
   std::cout << " pop %edx" << std::endl;
   std::cout << " pop %ecx" << std::endl;
   std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
- 
-  // push return to stack
-  // std::cout << " push %ebx" << std::endl;
-
-  // if an allocated object is of a class with a super type, only the child class constructor is called
-  
-  // constructors may be chained, but this must be explicitly done by the programmer
-  // ^ going to assume this is handled by methodnode
-
+  }
 }
 
 void CodeGenerator::visitIntegerTypeNode(IntegerTypeNode* node) {
