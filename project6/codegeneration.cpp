@@ -119,7 +119,7 @@ VariableInfo findVariableInfo(std::string memberName, MethodInfo methodInfo, std
   // can assume exist bc typechecking
   
   // bool isLocal(std::string memberName, MethodInfo methodInfo) {
-  if (isLocal(memberName, methodInfo)) {
+  if (isLocal(memberName, methodInfo) && (methodInfo.variables->find(memberName) != methodInfo.variables->end())) {
     return (methodInfo.variables)->at(memberName);
   } else { // check class and then recursively check superclasses
 
@@ -196,16 +196,18 @@ std::string findClassNameFromMethodName(std::string methodName, std::string clas
 
 int findClassSize(std::string className, ClassTable* classTable) {
   int size = 0;
-  ClassInfo currentClassInfo = classTable->at(className);
-  size += currentClassInfo.membersSize;
-  std::string currentSuperclassName = currentClassInfo.superClassName;
-
-  while (currentSuperclassName != "") {
-    currentClassInfo = classTable->at(currentSuperclassName);
+  if (classTable->find(className) != classTable->end()) {
+    ClassInfo currentClassInfo = classTable->at(className);
     size += currentClassInfo.membersSize;
-    currentSuperclassName = currentClassInfo.superClassName;
-  }
+    std::string currentSuperclassName = currentClassInfo.superClassName;
 
+    while (currentSuperclassName != "") {
+      currentClassInfo = classTable->at(currentSuperclassName);
+      size += currentClassInfo.membersSize;
+      currentSuperclassName = currentClassInfo.superClassName;
+    }
+
+  }
   return size;
 }
 
@@ -214,7 +216,7 @@ bool has_constructor(ClassTable* classTable, std::string className) {
   if (classTable->find(className) == classTable->end()) return false;
 
   else {
-    ClassInfo currClassInfo = (*classTable)[className];
+    ClassInfo currClassInfo = classTable->at(className);
     MethodTable *currMethods = currClassInfo.methods;
     if (currMethods->find(className) != currMethods->end()) return true;
   }
@@ -595,13 +597,13 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
   this->currentMethodInfo = saveMethodInfo;
 
   std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
-  if(node->expression_list){
-    for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-      // visitExpressionNode((*it), this);
-      std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
-      // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
-    }
-  }
+  // if(node->expression_list){
+  //   for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+  //     // visitExpressionNode((*it), this);
+  //     std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
+  //     // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
+  //   }
+  // }
 
   //removing arguments from stack
   int arg_size = 4;
@@ -621,13 +623,15 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
     std::string currentClassName = tempVariableInfo.type.objectClassName;
     var_to_eax(node->identifier_2->name, currentClassInfo);
 
-    std::string class_name = node->identifier_1->name;
+    std::string class_name = node->identifier_1->objectClassName;
     std::string mem = node->identifier_2->name;
+    std::cout << "# class_name" << std::endl;    
     //int offset;
     
     if (this->classTable->find(class_name) != this->classTable->end()) {
       ClassInfo curr = (*classTable)[class_name];
-      offset = curr.members->at(mem).offset;
+      //std::cout << "# class_name" << std::endl; 
+      //offset = curr.members->at(mem).offset;
     }
     std::cout << " push " << std::to_string(offset) << "(%eax)" << std::endl; 
 }
@@ -669,20 +673,23 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   std::cout << " add $4, %esp" << std::endl;
   std::cout << " push %eax" << std::endl; // is this ok to be called here?
 
+  int i = 0;
   if (has_constructor(this->classTable, objectTypeName)) {
   std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
   // (1) save caller registers
   std::cout << " push %eax" << std::endl;
   std::cout << " push %ecx" << std::endl;
   std::cout << " push %edx" << std::endl;
-
+  i += 12;
   if(node->expression_list){
     for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
       //visitExpressionNode((*it), this);
       (*it)->accept(this);
+      i += 4;
     }
   }
   // self pointer?
+  std::cout << " mov " << std::to_string(i) << "(%esp), %eax" << std::endl; 
   std::cout << " push %eax" << std::endl;
 
   std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
