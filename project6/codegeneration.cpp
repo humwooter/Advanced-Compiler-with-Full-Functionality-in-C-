@@ -251,7 +251,12 @@ std::string findClassNameFromMethodName(std::string methodName, std::string clas
     // can assume exist bc typechecking
 
       ClassInfo tempClassInfo = classTable->at(className);
+      std::cout << "# debugging findClassNameFromMethodName: " << className << std::endl;
+      std::cout << "# debugging findClassNameFromMethodName: " << methodName << std::endl;
+      std::cout << "# debugging findClassNameFromMethodName: " << tempClassInfo.superClassName << std::endl;
       MethodTable *tempMethodTable = tempClassInfo.methods;
+      std::cout << "# debugging findClassNameFromMethodName: " << (tempMethodTable->find(methodName) != tempMethodTable->end()) << std::endl;
+      
 
       if (tempMethodTable->find(methodName) != tempMethodTable->end()) {
         return className;
@@ -680,31 +685,30 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
         std::cout << " push %eax" << std::endl;
       }
     } else {
-      std::cout << " push 8(%ebp)" << std::endl;
-        /*
+      // std::cout << " push 8(%ebp)" << std::endl;
         if (this->currentClassName != "Main") {
             std::cout << "   mov 8(%ebp), %eax" << std::endl;
             std::cout << "   push %eax" << std::endl;
         } else {
             std::cout << "   add $-4, %esp" << std::endl;
         }
-        */
     }
 
     std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
     if (node->identifier_2) {
       VariableInfo memberInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-      std::string tempClassName = memberInfo.type.objectClassName;
+      // std::string tempClassName = memberInfo.type.objectClassName;
+      std::string tempClassName = findClassNameFromMethodName(node->identifier_2->name, memberInfo.type.objectClassName, this->classTable);
       std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
     } else {
-      std::string tempClassName = findClassNameFromMethodName(this->currentMethodName, this->currentClassName, this->classTable);
+      std::string tempClassName = findClassNameFromMethodName(node->identifier_1->name, this->currentClassName, this->classTable);
       std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
     }
 
       int arg_size = 4;
-  if (node->expression_list) {
-    arg_size += 4 * node->expression_list->size();
-  }
+      if (node->expression_list) {
+        arg_size += 4 * node->expression_list->size();
+      }
   std::cout << " add $" << std::to_string(arg_size) << ", %esp" << std::endl;
 
     std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
