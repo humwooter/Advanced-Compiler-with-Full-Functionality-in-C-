@@ -859,16 +859,28 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
 //   }
  
 // }
-
 void CodeGenerator::visitVariableNode(VariableNode* node) {
-  // WRITEME: Replace with code if necessary
-  node->visit_children(this);
   std::cout << "# VARIABLE" << std::endl;
-  std::string var_name = node->identifier->name;
+  if (!(isLocal(node->identifier->name, this->currentMethodInfo))) { 
+        int memberOffset = findOffset(this->classTable, node->identifier->name, this->currentClassName);
+        std::cout << "   mov " << "8(%ebp), %eax" << std::endl; 
+        std::cout << "   mov " << memberOffset << "(%eax), %eax" << std::endl;
+        std::cout << "   push %eax" << std::endl;
+    } else {                 
+        std::cout << "   mov " << currentMethodInfo.variables->at(node->identifier->name).offset << "(%ebp), %eax" << std::endl;
+        std::cout << "   push %eax" << std::endl; 
+  }
 
-  var_to_eax(var_name, this->currentMethodInfo, this->currentClassInfo);
-  std::cout << " push %eax" << std::endl; 
 }
+// void CodeGenerator::visitVariableNode(VariableNode* node) {
+//   // WRITEME: Replace with code if necessary
+//   node->visit_children(this);
+//   std::cout << "# VARIABLE" << std::endl;
+//   std::string var_name = node->identifier->name;
+
+//   var_to_eax(var_name, this->currentMethodInfo, this->currentClassInfo);
+//   std::cout << " push %eax" << std::endl; 
+// }
 
 void CodeGenerator::visitIntegerLiteralNode(IntegerLiteralNode* node) {
   // WRITEME: Replace with code if necessary
