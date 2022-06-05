@@ -680,12 +680,15 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
         std::cout << " push %eax" << std::endl;
       }
     } else {
+      std::cout << " push 8(%ebp)" << std::endl;
+        /*
         if (this->currentClassName != "Main") {
             std::cout << "   mov 8(%ebp), %eax" << std::endl;
             std::cout << "   push %eax" << std::endl;
         } else {
             std::cout << "   add $-4, %esp" << std::endl;
         }
+        */
     }
 
     std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
