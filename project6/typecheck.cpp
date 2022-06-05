@@ -752,7 +752,6 @@ void TypeCheck::visitNewNode(NewNode* node) {
   }
   if (has_constructor(this->classTable, this->currentClassName)) {
     //typeError(undefined_class);
-    std::cout << "new change?" << std::endl; 
     ClassInfo class_info = this->classTable->at(constructor_name);
     MethodInfo method_info = class_info.methods->at(constructor_name);
     //argumentsHelper(method_info.parameters, node->expression_list);
