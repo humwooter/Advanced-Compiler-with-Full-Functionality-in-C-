@@ -756,7 +756,7 @@ void CodeGenerator::visitVariableNode(VariableNode* node) {
   std::cout << "# VARIABLE" << std::endl;
 
   // ZHENG:
-  // /*
+  /*
   if (!(isLocal(node->identifier->name, this->currentMethodInfo))) { 
         int memberOffset = findOffset(this->classTable, node->identifier->name, this->currentClassName);
         std::cout << "   mov " << "8(%ebp), %eax" << std::endl; 
@@ -766,7 +766,7 @@ void CodeGenerator::visitVariableNode(VariableNode* node) {
         std::cout << "   mov " << currentMethodInfo.variables->at(node->identifier->name).offset << "(%ebp), %eax" << std::endl;
         std::cout << "   push %eax" << std::endl; 
   }
-  // */
+  */
 
   std::string var_name = node->identifier->name;
 
@@ -783,8 +783,8 @@ void CodeGenerator::visitVariableNode(VariableNode* node) {
   // std::cout << " mov " << objectOffset << "(%ebx), %eax" << std::endl; 
   // */
   
-  // var_to_eax(var_name, this->currentMethodInfo, this->currentClassInfo);
-  // std::cout << " push %eax" << std::endl; 
+  var_to_eax(var_name, this->currentMethodInfo, this->currentClassInfo);
+  std::cout << " push %eax" << std::endl; 
 }
 
 void CodeGenerator::visitIntegerLiteralNode(IntegerLiteralNode* node) {
