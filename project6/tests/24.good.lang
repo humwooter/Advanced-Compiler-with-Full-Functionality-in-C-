@@ -1,3 +1,14 @@
+/*
+After execute a = c.BtoA(b); both pointers in "b" and "a" are pointing to the address of object "b".
+
+But when you what to access member "x", they applied different rules:
+
+1) If you access "b.x" you should additionally add a "superclass offset" (total_members_in _all_superclass * 4) since classB is inherited  from classA.
+
+2) If you access "a.x" you can just use a local offset within classA.
+
+That is how casting works in 24.good.lang.
+*/
 classA {
      integer x;
 
