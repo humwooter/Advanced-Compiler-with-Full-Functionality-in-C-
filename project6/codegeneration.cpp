@@ -771,22 +771,31 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
   std::string saveMethodName = this->currentMethodName;
   MethodInfo saveMethodInfo = this->currentMethodInfo;
   std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
-  if (node->identifier_2) { // must be object via TypeCheck
+  // if (node->identifier_2) { // must be object via TypeCheck
+  //   VariableInfo memberInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
+  //   std::string tempClassName = memberInfo.type.objectClassName;
+  //   //this->currentMethodName = node->identifier_2->name;
+  //   //this->currentMethodInfo = ((this->classTable->at(tempClassName)).methods)->at(this->currentMethodName);
+  //   std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
+  // } else {
+  //   // this->currentMethodName = node->identifier_1->name;
+  //   // this->currentMethodInfo = findMethodInfo(this->currentMethodName, this->currentClassName, this->classTable);
+  //   std::string tempClassName = findClassNameFromMethodName(this->currentMethodName, this->currentClassName, this->classTable);
+  //   std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
+  // }
+
+  // this->currentMethodName = saveMethodName;
+  // this->currentMethodInfo = saveMethodInfo;
+  std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
+  if (node->identifier_2) {
     VariableInfo memberInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-    std::string tempClassName = memberInfo.type.objectClassName;
-    this->currentMethodName = node->identifier_2->name;
-    this->currentMethodInfo = ((this->classTable->at(tempClassName)).methods)->at(this->currentMethodName);
+    // std::string tempClassName = memberInfo.type.objectClassName;
+    std::string tempClassName = findClassNameFromMethodName(node->identifier_2->name, memberInfo.type.objectClassName, this->classTable);
     std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
   } else {
-    this->currentMethodName = node->identifier_1->name;
-      this->currentMethodInfo = findMethodInfo(this->currentMethodName, this->currentClassName, this->classTable);
-      std::string tempClassName = findClassNameFromMethodName(this->currentMethodName, this->currentClassName, this->classTable);
-      std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
+    std::string tempClassName = findClassNameFromMethodName(node->identifier_1->name, this->currentClassName, this->classTable);
+    std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
   }
-
-  this->currentMethodName = saveMethodName;
-  this->currentMethodInfo = saveMethodInfo;
-
   std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
   // if(node->expression_list){
   //   for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
