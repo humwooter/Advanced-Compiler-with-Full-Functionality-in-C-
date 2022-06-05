@@ -698,8 +698,15 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
       std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
     }
 
+      int arg_size = 4;
+  if (node->expression_list) {
+    arg_size += 4 * node->expression_list->size();
+  }
+  std::cout << " add $" << std::to_string(arg_size) << ", %esp" << std::endl;
+
     std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
 
+    /*
     std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
          if(node->expression_list){
           for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
@@ -708,6 +715,7 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
               // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
         }
     }
+    */
     // std::cout << "  add $" << 4 * (node->expression_list->size() + 1) << ", %esp" << std::endl;
 
     // restore caller-save
