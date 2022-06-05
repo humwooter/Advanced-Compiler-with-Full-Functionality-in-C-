@@ -705,17 +705,17 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
       std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
     }
 
+    std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
       int arg_size = 4;
       if (node->expression_list) {
         arg_size += 4 * node->expression_list->size();
       }
-  std::cout << " add $" << std::to_string(arg_size) << ", %esp" << std::endl;
+      
+      std::cout << " add $" << std::to_string(arg_size) << ", %esp" << std::endl;
 
-    std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
+      std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
 
-    /*
-    std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
-         if(node->expression_list){
+    /*     if(node->expression_list){
           for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
               // visitExpressionNode((*it), this);
               std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
@@ -732,9 +732,6 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
 
     // push return to stack
     std::cout << " push %ebx" << std::endl;
-
-    // do we need to reset currentMethodName and currentMethodInfo?
-    // ^ ans idts, it only matters for %
 }
 
 void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
@@ -766,12 +763,8 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
 }
 
 void CodeGenerator::visitVariableNode(VariableNode* node) {
-  // WRITEME: Replace with code if necessary
-  // node->visit_children(this);
-  std::cout << "# VARIABLE" << std::endl;
 
-  // ZHENG:
-  // /*
+  std::cout << "# VARIABLE" << std::endl;
   if (!(isLocal(node->identifier->name, this->currentMethodInfo))) { 
         int memberOffset = findOffset(this->classTable, node->identifier->name, this->currentClassName);
         std::cout << "   mov " << "8(%ebp), %eax" << std::endl; 
@@ -781,26 +774,6 @@ void CodeGenerator::visitVariableNode(VariableNode* node) {
         std::cout << "   mov " << currentMethodInfo.variables->at(node->identifier->name).offset << "(%ebp), %eax" << std::endl;
         std::cout << "   push %eax" << std::endl; 
   }
-  // */
-
-/*
-  std::string var_name = node->identifier->name;
-  var_to_eax(var_name, this->currentMethodInfo, this->currentClassInfo);
-  std::cout << " push %eax" << std::endl; 
-  */
-
-  // /*
-  // // int findOffset(ClassTable* classTable, std::string memberName, std::string className)
-  // int objectOffset;
-  // if (isLocal(var_name, currentMethodInfo)) {
-  //   std::cout << "# IS LOCAL: " << var_name << std::endl;
-  //   objectOffset = ((currentMethodInfo.variables)->at(var_name)).offset;
-  // } else {
-  //   // objectOffset = findOffset(this->classTable, var_name, this->currentClassName);
-  // }
-  // std::cout << " mov 8(%ebp), %ebx" << std::endl; //getting to self pointer
-  // std::cout << " mov " << objectOffset << "(%ebx), %eax" << std::endl; 
-  // */
 
 }
 
@@ -809,6 +782,8 @@ void CodeGenerator::visitIntegerLiteralNode(IntegerLiteralNode* node) {
   node->visit_children(this);  
   std::cout << " #INTEGER_LITERAL" << std::endl; 
   std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
+  std::cout << " pop %eax" << std::endl;
+  std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
 }
 
 void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
@@ -816,7 +791,8 @@ void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
   node->visit_children(this);
   std::cout << " #BOOLEAN_LITERAL" << std::endl; 
   std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
-  
+  std::cout << " pop %eax" << std::endl;
+  std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
 }
 
 void CodeGenerator::visitNewNode(NewNode* node) {

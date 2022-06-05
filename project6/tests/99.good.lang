@@ -1,9 +1,42 @@
+class0 {
+    integer	member0;
+    integer	member1;
+    integer	member2;
+    boolean	member3;
+    integer	member4;
+    boolean	member5;
+    f1(boolean arg0) -> integer {
+        
+        return 115;
+
+    }
+
+    class0(integer arg0, integer arg1, integer arg2, boolean arg3, integer arg4) -> none {
+
+    }
+}
+
+class1 extends class0 {
+    integer	member6;
+    class1() -> none {
+        
+    }
+}
+
 Main {
-    integer y;
-     main() -> none {
-     	    integer x;
-     	    x = 6 - 4;
-     	    print x * 2;
-     }    
+
+
+    main() -> none {
+        class1 local0;
+        
+        local0 = new class1();
+        
+        local0.member6 = 79;
+        print local0.f1(true);
+        local0.member6 = 203;
+
+    }
+
 
 }
+
