@@ -380,6 +380,7 @@ void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
   // WRITEME: Replace with code if necessary
     std::cout << "#### RETURN_STATEMENT" << std::endl;
     node->visit_children(this);
+    std::cout << " pop %eax" << std::endl;
 }
 
 void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
@@ -782,8 +783,8 @@ void CodeGenerator::visitIntegerLiteralNode(IntegerLiteralNode* node) {
   node->visit_children(this);  
   std::cout << " #INTEGER_LITERAL" << std::endl; 
   std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
-  std::cout << " pop %eax" << std::endl;
-  std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
+  // std::cout << " pop %eax" << std::endl;
+  // std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
 }
 
 void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
@@ -791,8 +792,8 @@ void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
   node->visit_children(this);
   std::cout << " #BOOLEAN_LITERAL" << std::endl; 
   std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
-  std::cout << " pop %eax" << std::endl;
-  std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
+  // std::cout << " pop %eax" << std::endl;
+  // std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
 }
 
 void CodeGenerator::visitNewNode(NewNode* node) {
