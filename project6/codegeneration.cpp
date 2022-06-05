@@ -1,10 +1,5 @@
 #include "codegeneration.hpp"
 
-//bool local;
-//bool param;
-// int currLocalOffset = 0;
-// int currParamOffset = 0;
-int offset;
 // CodeGenerator Visitor Functions: These are the functions
 // you will complete to generate the x86 assembly code. Not
 // all functions must have code, many may be left empty.
@@ -83,16 +78,6 @@ void setOffset(ClassTable* classTable, std::string currClassName, ClassInfo curr
 }
 */
 
-// laszlo
-
-// could prob rewrite using currentMethodInfo lmao
-/*
-bool isLocal(ClassTable* classTable, std::string memberName, std::string methodName, std::string className) {
-    VariableTable* currentVariableTable = (((classTable->at(className)).methods)->at(methodName)).variables;
-    return (currentVariableTable->find(memberName) != currentVariableTable->end());
-}
-*/
-
 bool isLocal(std::string memberName, MethodInfo methodInfo) {
     VariableTable* currentVariableTable = methodInfo.variables;
     return (currentVariableTable->find(memberName) != currentVariableTable->end());
@@ -154,43 +139,6 @@ int findOffset(ClassTable* classTable, std::string memberName, std::string class
   return tempOffset;
 }
 
-// address to ebx
-void access(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
-  int offset;
-  if (isLocal(memberName, methodInfo)) {
-    // std::cout << "#### local!" << std::endl;
-    offset = ((methodInfo.variables)->at(memberName)).offset;
-    std::cout << " mov " << offset << "(%ebp), %ebx" << std::endl;
-  } else {
-    offset = findOffset(classTable, memberName, className);
-    std::cout << " mov 8(%ebp), %edx" << std::endl;
-    std::cout << " mov " << offset << "(%edx), %ebx" << std::endl;
-  }
-}
-
-/*
-// eax to address (assume already in eax)
-void reverse_access(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
-  int offset;
-  if (isLocal(memberName, methodInfo)) {
-    offset = ((methodInfo.variables)->at(memberName)).offset;
-    std::cout << " mov %eax, " << offset << "(%ebp)" << std::endl;
-  } else {
-    offset = findOffset(classTable, memberName, className);
-    std::cout << " mov 8(%ebp), %edx" << std::endl; // NEEL correct?
-    std::cout << " mov %eax, " << offset << "(%edx)" << std::endl;
-  }
-}
-
-// eax to address (assume already in eax)
-void reverse_access(std::string memberName, std::string className, ClassTable* classTable) {
-  int offset;
-  offset = findOffset(classTable, memberName, className);
-  std::cout << " mov 8(%ebp), %edx" << std::endl; // NEEL correct?
-  std::cout << " mov %eax, " << offset << "(%edx)" << std::endl;
-}
-*/
-
 // can prob replace className with currentClassInfo
 VariableInfo findVariableInfo(std::string memberName, MethodInfo methodInfo, std::string className, ClassTable* classTable) {
   // can assume exist bc typechecking
@@ -220,7 +168,7 @@ VariableInfo findVariableInfo(std::string memberName, MethodInfo methodInfo, std
     }
 
   }
-  // return classTable->at(className).members->at(memberName);
+  return classTable->at(className).members->at(memberName);
 }
 
 MethodInfo findMethodInfo(std::string methodName, std::string className, ClassTable* classTable) {
@@ -251,12 +199,7 @@ std::string findClassNameFromMethodName(std::string methodName, std::string clas
     // can assume exist bc typechecking
 
       ClassInfo tempClassInfo = classTable->at(className);
-      std::cout << "# debugging findClassNameFromMethodName: " << className << std::endl;
-      std::cout << "# debugging findClassNameFromMethodName: " << methodName << std::endl;
-      std::cout << "# debugging findClassNameFromMethodName: " << tempClassInfo.superClassName << std::endl;
       MethodTable *tempMethodTable = tempClassInfo.methods;
-      std::cout << "# debugging findClassNameFromMethodName: " << (tempMethodTable->find(methodName) != tempMethodTable->end()) << std::endl;
-      
 
       if (tempMethodTable->find(methodName) != tempMethodTable->end()) {
         return className;
@@ -307,8 +250,7 @@ bool constructor_exists(ClassTable* classTable, std::string className) {
 
 
 void CodeGenerator::visitProgramNode(ProgramNode* node) {
-    // WRITEME: Replace with code if necessary
-  std::cout << "# PROGRAM NODE" << std::endl;
+  // std::cout << "# PROGRAM NODE" << std::endl;
   std::cout << " .data" << std::endl; //check
   std::cout << "printstr: .asciz \"%d\\n\"" << std::endl << std::endl;
   std::cout << " .text" << std::endl;
@@ -323,7 +265,7 @@ void CodeGenerator::visitClassNode(ClassNode* node) {
 }
 
 void CodeGenerator::visitMethodNode(MethodNode* node) {
-    std::cout << "#### METHOD NODE (1): method prologue" << std::endl;
+    // std::cout << "#### METHOD NODE (1): method prologue" << std::endl;
     this->currentMethodName = node->identifier->name;
     this->currentMethodInfo = (currentClassInfo.methods)->at(this->currentMethodName);
     
@@ -344,10 +286,10 @@ void CodeGenerator::visitMethodNode(MethodNode* node) {
     std::cout << " push %edi" << std::endl;
 
     // run method by visit_children    
-    std::cout << "#### METHOD NODE (2): method body (visit children)" << std::endl;
+    // std::cout << "#### METHOD NODE (2): method body (visit children)" << std::endl;
     node->visit_children(this);
     
-    std::cout << "#### METHOD NODE (3): method epilogue" << std::endl;
+    // std::cout << "#### METHOD NODE (3): method epilogue" << std::endl;
     // (1) restore callee-save registers
     std::cout << " pop %edi" << std::endl;
     std::cout << " pop %esi" << std::endl;
@@ -368,84 +310,60 @@ void CodeGenerator::visitMethodBodyNode(MethodBodyNode* node) {
 }
 
 void CodeGenerator::visitParameterNode(ParameterNode* node) {
-    // node->visit_children(this); // necessary?
+    // WRITEME: Replace with code if necessary
 }
 
 void CodeGenerator::visitDeclarationNode(DeclarationNode* node) {
     // WRITEME: Replace with code if necessary
-    // node->visit_children(this);
 }
 
 void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
-  // WRITEME: Replace with code if necessary
-    std::cout << "#### RETURN_STATEMENT" << std::endl;
+    // std::cout << "#### RETURN_STATEMENT" << std::endl;
     node->visit_children(this);
     std::cout << " pop %eax" << std::endl;
 }
 
-void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
-  std::cout << "#### ASSIGNMENT NODE" << std::endl;
+void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { 
+  // std::cout << "#### ASSIGNMENT NODE" << std::endl;
   node->visit_children(this);
-  // std::cout << " pop %ecx" << std::endl;
-  /* cases:
-  member
-  localVar
-  member.member
-  localVar.member
-  */
-
-  // /*
 
   if(node->identifier_2) { // local.member or member.member
       int offset1;
-      if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member <== I THINK THIS WORKS
+      if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member
       {
         offset1 = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
         std::cout << " mov " << offset1 << "(%ebp), %eax" << std::endl;
-        // i believe %eax holds local's pointer
-      } else { // class or superclass // member.member
+      } else { member.member
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
-        offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
-        std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
-        // theoretically %eax holds member's pointer?
+        offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
+        std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl;
       }
       // %eax should hold pointer to identifier_1
       VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
       int offset2 = findOffset(this->classTable, node->identifier_2->name, tempVariableInfo.type.objectClassName);
-      // can u one-line the following two lines
-
       std::cout << " pop " << offset2 << "(%eax)" << std::endl;
-      // std::cout << " mov " << offset2 << "(%eax), %eax" << std::endl;
-      // std::cout << " pop %eax" << std::endl;
         
       } else { // local or member
         if (isLocal(node->identifier_1->name, this->currentMethodInfo)) { // local --> DEFINITELY WORKS
             int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
             std::cout << " pop " << offset << "(%ebp)" << std::endl;
-            // does not work idk why: access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);      
         } else { // member
             
-            // taken from variable:
             int memberOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
             std::cout << " mov " << "8(%ebp), %eax" << std::endl; 
 
             std::cout << " pop " << memberOffset << "(%eax)" << std::endl;
-            // std::cout << "   mov " << memberOffset << "(%eax), %eax" << std::endl;
-            // std::cout << "   pop %eax" << std::endl;
         }
     }
-    // */
 
 }
 
 void CodeGenerator::visitCallNode(CallNode* node) {
-  // WRITEME: Replace with code if necessary
   node->visit_children(this);
 }
 
-void CodeGenerator::visitIfElseNode(IfElseNode* node) { //could be wrong
-  // WRITEME: Replace with code if necessary
-  std::cout << "# IF ELSE" << std::endl;
+void CodeGenerator::visitIfElseNode(IfElseNode* node) {
+  // std::cout << "# IF ELSE" << std::endl;
   node->expression->accept(this);
   bool else_taken = node->statement_list_2;
 
@@ -474,9 +392,8 @@ void CodeGenerator::visitIfElseNode(IfElseNode* node) { //could be wrong
   std::cout << after_if_elseLabel << ":" << std::endl; 
 }
 
-void CodeGenerator::visitWhileNode(WhileNode* node) { //might be wrong
-  //WRITEME: Replace with code if necessary
-  std::cout << "# WHILE" << std::endl;
+void CodeGenerator::visitWhileNode(WhileNode* node) {
+  // std::cout << "# WHILE" << std::endl;
   std::string whileLabel = "label_" + std::to_string(nextLabel()) ;
   std::string after_whileLabel = "label_" + std::to_string(nextLabel()) ;
  
@@ -495,18 +412,15 @@ void CodeGenerator::visitWhileNode(WhileNode* node) { //might be wrong
 }
 
 void CodeGenerator::visitPrintNode(PrintNode* node) {
-  // WRITEME: Replace with code if necessary
-  std::cout << "# PRINT" << std::endl;
+  // std::cout << "# PRINT" << std::endl;
   node->visit_children(this);
   std::cout << " push $printstr" << std::endl;
   std::cout << " call printf" << std::endl;  
 }
 
 void CodeGenerator::visitDoWhileNode(DoWhileNode* node) {
-  // WRITEME: Replace with code if necessary
-  std::cout << "# DO WHILE" << std::endl;
-  std::string do_whileLabel = "label_" + std::to_string(nextLabel()) ;
-  //std::string after_whileLabel = "label_" + std::to_string(nextLabel()) ;   
+  // std::cout << "# DO WHILE" << std::endl;
+  std::string do_whileLabel = "label_" + std::to_string(nextLabel()) ; 
  
   std::cout << do_whileLabel << ":" << std::endl; 
   for (std::list<StatementNode*>::iterator it = node->statement_list->begin(); it != node->statement_list->end(); it++) {
@@ -517,7 +431,6 @@ void CodeGenerator::visitDoWhileNode(DoWhileNode* node) {
   std::cout << "  pop %eax" << std::endl; //reg1 (check)
   std::cout << "  cmp $0, %eax" << std::endl; //comparison statement at beginning of while loop
   std::cout << " jne " << do_whileLabel << std::endl;
-  //std::cout << after_whileLabel << std::endl;
 }
 
 void CodeGenerator::visitPlusNode(PlusNode* node) {
@@ -527,7 +440,6 @@ void CodeGenerator::visitPlusNode(PlusNode* node) {
   std::cout << "  pop %eax" << std::endl; //reg1
   std::cout << "  add %edx, %eax" << std::endl; //(reg1 + reg2) -> reg1
   std::cout << "  push %eax" << std::endl; //push reg1
-  // WRITEME: Replace with code if necessary
 }
 
 void CodeGenerator::visitMinusNode(MinusNode* node) {
@@ -537,7 +449,6 @@ void CodeGenerator::visitMinusNode(MinusNode* node) {
   std::cout << "  pop %eax" << std::endl; //reg1
   std::cout << "  sub %edx, %eax" << std::endl; //(reg2 - reg1) -> reg2
   std::cout << "  push %eax" << std::endl; //push reg2
-  // WRITEME: Replace with code if necessary
 }
 
 void CodeGenerator::visitTimesNode(TimesNode* node) {
@@ -547,11 +458,9 @@ void CodeGenerator::visitTimesNode(TimesNode* node) {
   std::cout << "  pop %eax" << std::endl; //reg1
   std::cout << "  imul %edx, %eax" << std::endl; //(reg1 * reg2) -> reg1
   std::cout << "  push %eax" << std::endl; //push reg1
-  // WRITEME: Replace with code if necessary
 }
 
 void CodeGenerator::visitDivideNode(DivideNode* node) {
-  // WRITEME: Replace with code if necessary
   node->visit_children(this);
   std::cout << "  # DIVIDE" << std::endl;
   std::cout << "  pop %ebx" << std::endl; //reg2 = denominator 
@@ -560,9 +469,8 @@ void CodeGenerator::visitDivideNode(DivideNode* node) {
   std::cout << "  idiv %ebx" << std::endl; //(%edx : %eax) / %ebx -> %eax
   std::cout << "  push %eax" << std::endl; //quotient result of division
 }
-//check
-void CodeGenerator::visitGreaterNode(GreaterNode* node) { //jump instr using cmp and jg
-  // WRITEME: Replace with code if necessary
+
+void CodeGenerator::visitGreaterNode(GreaterNode* node) {
   node->visit_children(this);
   std::cout << " #GREATER_THAN" << std::endl; 
   std::string greaterLabel = "label_" + std::to_string(nextLabel()) + ":";
@@ -571,34 +479,21 @@ void CodeGenerator::visitGreaterNode(GreaterNode* node) { //jump instr using cmp
   std::cout << "  cmp %ebx, %eax" << std::endl;
   std::cout << " setg %al" << std::endl;
   std::cout << " movzx %al, %eax" << std::endl;
-  std::cout << " push %eax" << std::endl; 
-
-  // std::cout << "  jg " << greaterLabel << std::endl;
-  // std::string label = "label_" + std::to_string(nextLabel()) + ":";
-  // std::cout << " jmp  " << label << std::endl;
-  
+  std::cout << " push %eax" << std::endl;
 }
-//check
-void CodeGenerator::visitGreaterEqualNode(GreaterEqualNode* node) { //jump instr using cmp and jge
-  // WRITEME: Replace with code if necessary
+
+void CodeGenerator::visitGreaterEqualNode(GreaterEqualNode* node) {
   node->visit_children(this);
-  std::cout << " #GREATER_THAN_OR_EQUAL" << std::endl; 
-  //std::string greater_equalLabel = "label_" + std::to_string(nextLabel()) + ":";
+  std::cout << " #GREATER_THAN_OR_EQUAL" << std::endl;
   std::cout << "  pop %ebx" << std::endl; //reg2
   std::cout << "  pop %eax" << std::endl; //reg1  
   std::cout << "  cmp %ebx, %eax" << std::endl;
   std::cout << " setge %al" << std::endl;
   std::cout << " movzx %al, %eax" << std::endl;
-  std::cout << " push %eax" << std::endl; 
-
-  // std::cout << "  jge " << greater_equalLabel << std::endl;
-  // std::string label = "label_" + std::to_string(nextLabel()) + ":";
-  // std::cout << " jmp  " << label << std::endl;
-    
-  //might be wrong
+  std::cout << " push %eax" << std::endl;
 }
-//check
-void CodeGenerator::visitEqualNode(EqualNode* node) { //jump instr using cmp and je
+
+void CodeGenerator::visitEqualNode(EqualNode* node) {
   node->visit_children(this);
   std::cout << " #EQUAL" << std::endl; 
   std::cout << "  pop %ebx" << std::endl; //reg2
@@ -610,8 +505,7 @@ void CodeGenerator::visitEqualNode(EqualNode* node) { //jump instr using cmp and
 
 }
 
-void CodeGenerator::visitAndNode(AndNode* node) { //might be wrong
-  // WRITEME: Replace with code if necessary
+void CodeGenerator::visitAndNode(AndNode* node) {
   node->visit_children(this);
   std::cout << "  # AND" << std::endl;
   std::cout << "  pop %ebx" << std::endl; //reg2
@@ -621,7 +515,7 @@ void CodeGenerator::visitAndNode(AndNode* node) { //might be wrong
   std::cout << "  push %eax" << std::endl; //push reg1
 }
 
-void CodeGenerator::visitOrNode(OrNode* node) { //might be wrong
+void CodeGenerator::visitOrNode(OrNode* node) {
   node->visit_children(this);
   std::cout << "  # OR" << std::endl;
   std::cout << "  pop %ebx" << std::endl; //reg2
@@ -629,11 +523,9 @@ void CodeGenerator::visitOrNode(OrNode* node) { //might be wrong
   std::cout << "  orl %ebx, %eax" << std::endl; //(reg1 && reg2) -> reg1
   std::cout << "  andl $1, %eax" << std::endl; 
   std::cout << "  push %eax" << std::endl; //push reg1
-  // WRITEME: Replace with code if necessary
 }
 
-void CodeGenerator::visitNotNode(NotNode* node) { //might be wrong
-  // WRITEME: Replace with code if necessary
+void CodeGenerator::visitNotNode(NotNode* node) {
   node->visit_children(this);
   std::cout << "  # NOT" << std::endl;
   std::cout << "  pop %eax" << std::endl; //reg1
@@ -643,7 +535,6 @@ void CodeGenerator::visitNotNode(NotNode* node) { //might be wrong
 }
 
 void CodeGenerator::visitNegationNode(NegationNode* node) {
-  // WRITEME: Replace with code if necessary
   node->visit_children(this);
   std::cout << " #NEGATION" << std::endl;
   std::cout << " pop %eax" << std::endl;
@@ -652,11 +543,8 @@ void CodeGenerator::visitNegationNode(NegationNode* node) {
 }
 
 void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
-  // WRITEME: Replace with code if necessary
-
-  // in general may have to debug currentMethodName and currentMethodInfo and make sure they're doing what we want them to do
-
-    std::cout << "#### METHOD CALL NODE (1): pre-call sequence" << std::endl;
+    
+    // std::cout << "#### METHOD CALL NODE (1): pre-call sequence" << std::endl;
     // (1) save caller registers
     std::cout << " push %eax" << std::endl;
     std::cout << " push %ecx" << std::endl;
@@ -666,7 +554,6 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
     // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
      if(node->expression_list){
         for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-          //visitExpressionNode((*it), this);
             (*it)->accept(this);
         }
     }
@@ -681,12 +568,11 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
         std::cout << " push " << offset << "(%ebp)" << std::endl;
       } else { // class or superclass
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
-        offset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
-        std::cout << " mov " << offset << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
+        offset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
+        std::cout << " mov " << offset << "(%ebx), %eax" << std::endl;
         std::cout << " push %eax" << std::endl;
       }
     } else {
-      // std::cout << " push 8(%ebp)" << std::endl;
         if (this->currentClassName != "Main") {
             std::cout << "   mov 8(%ebp), %eax" << std::endl;
             std::cout << "   push %eax" << std::endl;
@@ -695,10 +581,9 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
         }
     }
 
-    std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
+    // std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
     if (node->identifier_2) {
       VariableInfo memberInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-      // std::string tempClassName = memberInfo.type.objectClassName;
       std::string tempClassName = findClassNameFromMethodName(node->identifier_2->name, memberInfo.type.objectClassName, this->classTable);
       std::cout << " call " << tempClassName << "_" << node->identifier_2->name << std::endl;
     } else {
@@ -706,7 +591,7 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
       std::cout << " call " << tempClassName << "_" << node->identifier_1->name << std::endl;
     }
 
-    std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
+    // std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
       int arg_size = 4;
       if (node->expression_list) {
         arg_size += 4 * node->expression_list->size();
@@ -715,16 +600,6 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
       std::cout << " add $" << std::to_string(arg_size) << ", %esp" << std::endl;
 
       std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
-
-    /*     if(node->expression_list){
-          for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-              // visitExpressionNode((*it), this);
-              std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
-              // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
-        }
-    }
-    */
-    // std::cout << "  add $" << 4 * (node->expression_list->size() + 1) << ", %esp" << std::endl;
 
     // restore caller-save
     std::cout << " pop %edx" << std::endl;
@@ -736,36 +611,28 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
 }
 
 void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
-  /* member.member
-  local.member */
-
-  std::cout << "#### MEMBER ACCESS NODE" << std::endl;
+  // std::cout << "#### MEMBER ACCESS NODE" << std::endl;
 
   int offset1;
-  if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member  <== I THINK THIS WORKS
+  if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member
   {
     offset1 = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
     std::cout << " mov " << offset1 << "(%ebp), %eax" << std::endl;
-    // std::cout << " push %eax" << std::endl;
-    // i believe %eax holds local's pointer
-  } else { // class or superclass // member.member
+  } else { // member.member
     std::cout << " mov 8(%ebp), %ebx" << std::endl;
-    offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
-    std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
-    // std::cout << " push %eax" << std::endl;
-    // theoretically %eax holds member's pointer?
+    offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
+    std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl;
   }
   // %eax should hold pointer to identifier_1
   VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
   int offset2 = findOffset(this->classTable, node->identifier_2->name, tempVariableInfo.type.objectClassName);
-  // can u one-line the following two lines
   std::cout << " push " << offset2 << "(%eax)" << std::endl;
 
 }
 
 void CodeGenerator::visitVariableNode(VariableNode* node) {
 
-  std::cout << "# VARIABLE" << std::endl;
+  // std::cout << "# VARIABLE" << std::endl;
   if (!(isLocal(node->identifier->name, this->currentMethodInfo))) { 
         int memberOffset = findOffset(this->classTable, node->identifier->name, this->currentClassName);
         std::cout << "   mov " << "8(%ebp), %eax" << std::endl; 
@@ -779,26 +646,19 @@ void CodeGenerator::visitVariableNode(VariableNode* node) {
 }
 
 void CodeGenerator::visitIntegerLiteralNode(IntegerLiteralNode* node) {
-  // WRITEME: Replace with code if necessary
   node->visit_children(this);  
   std::cout << " #INTEGER_LITERAL" << std::endl; 
   std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
-  // std::cout << " pop %eax" << std::endl;
-  // std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
 }
 
 void CodeGenerator::visitBooleanLiteralNode(BooleanLiteralNode* node) {
-  // WRITEME: Replace with code if necessary
   node->visit_children(this);
   std::cout << " #BOOLEAN_LITERAL" << std::endl; 
   std::cout << " push $" << std::to_string(node->integer->value) << std::endl; 
-  // std::cout << " pop %eax" << std::endl;
-  // std::cout << " push $" << std::to_string(node->integer->value) << std::endl;
 }
 
 void CodeGenerator::visitNewNode(NewNode* node) {
-  // WRITEME: Replace with code if necessary
-  std::cout << "#### NEW NODE (1): allocate space" << std::endl;
+  // std::cout << "#### NEW NODE (1): allocate space" << std::endl;
   // 1. allocate space
   std::string objectTypeName = node->identifier->name;
   int size = findClassSize(objectTypeName, this->classTable);
@@ -806,15 +666,13 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   std::cout << " push $" << size << std::endl;
   std::cout << " call malloc" << std::endl;
   std::cout << " add $4, %esp" << std::endl;
-  std::cout << " push %eax" << std::endl; // is this ok to be called here?
-
-  // ^ i think %eax is the self pointer that i can use when calling constructor?
+  std::cout << " push %eax" << std::endl;
 
   // check constructor exists
   int i = 0;
   if (constructor_exists(this->classTable, objectTypeName)) {  
       // 2. call constructor
-    std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
+    // std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
     // (1) save caller registers
     std::cout << " push %eax" << std::endl;
     std::cout << " push %ecx" << std::endl;
@@ -825,7 +683,6 @@ void CodeGenerator::visitNewNode(NewNode* node) {
     // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
     if(node->expression_list){
       for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-        //visitExpressionNode((*it), this);
         (*it)->accept(this);
         i += 4;
       }
@@ -833,30 +690,19 @@ void CodeGenerator::visitNewNode(NewNode* node) {
     std::cout << " mov " << i << "(%esp), %eax" << std::endl;
     std::cout << " push %eax" << std::endl;
 
-    std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
+    // std::cout << "#### NEW NODE (2): constructor call - call instruction" << std::endl;
     std::cout << " call " << objectTypeName  << "_" << objectTypeName << std::endl;
-    // only exception is Main_main but idt you ever call that
 
-
-    std::cout << "#### NEW CALL NODE (3): constructor call - post-return sequence" << std::endl;
+    // std::cout << "#### NEW CALL NODE (3): constructor call - post-return sequence" << std::endl;
     int arg_size = 4 + (i-12);                                                                                                                                                                                
     std::cout << " add $" << arg_size << ", %esp" << std::endl;                                                                                                                                               
   
-
     // restore caller-save
     std::cout << " pop %edx" << std::endl;
     std::cout << " pop %ecx" << std::endl;
     std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
     
   }
-  std::cout << "#### Done with new" << std::endl;
-  // push return to stack
-  // std::cout << " push %ebx" << std::endl;
-
-  // if an allocated object is of a class with a super type, only the child class constructor is called
-  
-  // constructors may be chained, but this must be explicitly done by the programmer
-  // ^ going to assume this is handled by methodnode
 }
 
 void CodeGenerator::visitIntegerTypeNode(IntegerTypeNode* node) {
