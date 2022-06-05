@@ -1,5 +1,7 @@
 #include "codegeneration.hpp"
 
+int offset;
+
 // CodeGenerator Visitor Functions: These are the functions
 // you will complete to generate the x86 assembly code. Not
 // all functions must have code, many may be left empty.
@@ -333,7 +335,7 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) {
       {
         offset1 = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
         std::cout << " mov " << offset1 << "(%ebp), %eax" << std::endl;
-      } else { member.member
+      } else { // member.member
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
         offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
         std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl;
