@@ -672,8 +672,7 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
       {
         // get local offset
         offset = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
-        std::cout << " mov " << offset << "(%ebp), %eax" << std::endl; // need to calculate objectOffset
-        std::cout << " push %eax" << std::endl;
+        std::cout << " push " << offset << "(%ebp)" << std::endl;
       } else { // class or superclass
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
         offset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
@@ -702,18 +701,13 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
     std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
 
     std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
-         if(node->expression_list){
-          for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-              // visitExpressionNode((*it), this);
-              std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
-              // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
-        }
-    }
+
+    // std::cout << "  add $" << 4 * (node->expression_list->size() + 1) << ", %esp" << std::endl;
 
     // restore caller-save
-    std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
-    std::cout << " pop %ecx" << std::endl;
     std::cout << " pop %edx" << std::endl;
+    std::cout << " pop %ecx" << std::endl;
+    std::cout << " pop %eax" << std::endl; // pop stack bottom back into %eax
 
     // push return to stack
     std::cout << " push %ebx" << std::endl;
@@ -752,7 +746,7 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
 
 void CodeGenerator::visitVariableNode(VariableNode* node) {
   // WRITEME: Replace with code if necessary
-  //node->visit_children(this);
+  node->visit_children(this);
   std::cout << "# VARIABLE" << std::endl;
 
   // ZHENG:
