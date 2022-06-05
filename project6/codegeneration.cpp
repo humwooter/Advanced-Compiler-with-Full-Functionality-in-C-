@@ -286,6 +286,18 @@ int findClassSize(std::string className, ClassTable* classTable) {
   return size;
 }
 
+bool constructor_exists(ClassTable* classTable, std::string className) {                                                                                                                                    
+  bool valid = false;                                                                                                                                                                                       
+  if (classTable->find(className) == classTable->end()) return false;                                                                                                                                       
+                                                                                                                                                                                                            
+  else {                                                                                                                                                                                                    
+    ClassInfo currClassInfo = classTable->at(className);                                                                                                                                                    
+    MethodTable *currMethods = currClassInfo.methods;                                                                                                                                                       
+    if (currMethods->find(className) != currMethods->end()) return true;                                                                                                                                    
+  }                                                                                                                                                                                                         
+  return false;                                                                                                                                                                                             
+}
+
 /* -------------------------------- helper functions ----------------------------------*/
 
 
@@ -310,7 +322,7 @@ void CodeGenerator::visitMethodNode(MethodNode* node) {
     this->currentMethodName = node->identifier->name;
     this->currentMethodInfo = (currentClassInfo.methods)->at(this->currentMethodName);
     
-    std::cout << this->currentClassName << "_" << this->currentMethodName << ":";
+    std::cout << this->currentClassName << "_" << this->currentMethodName << ":" << std::endl;
     // push old %ebp
     std::cout << " push %ebp" << std::endl;
     // Set new %ebp (may want to set to current %esp)
@@ -368,7 +380,7 @@ void CodeGenerator::visitReturnStatementNode(ReturnStatementNode* node) {
 void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
   std::cout << "#### ASSIGNMENT NODE" << std::endl;
   node->visit_children(this);
-  std::cout << " pop %ecx" << std::endl;
+  // std::cout << " pop %ecx" << std::endl;
   /* cases:
   member
   localVar
@@ -380,41 +392,40 @@ void CodeGenerator::visitAssignmentNode(AssignmentNode* node) { //could be wrong
 
   if(node->identifier_2) { // local.member or member.member
       int offset1;
-      if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member (17.good.lang)
+      if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member <== I THINK THIS WORKS
       {
-        offset1 = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-        // ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
+        offset1 = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
         std::cout << " mov " << offset1 << "(%ebp), %eax" << std::endl;
-        // std::cout << " push %eax" << std::endl;
         // i believe %eax holds local's pointer
       } else { // class or superclass // member.member
         std::cout << " mov 8(%ebp), %ebx" << std::endl;
         offset1 = findOffset(this->classTable, node->identifier_1->name, this->currentClassName); // if this works then we know findOffset is correct
         std::cout << " mov " << offset1 << "(%ebx), %eax" << std::endl; // need to calculate objectOffset
-        // std::cout << " push %eax" << std::endl;
         // theoretically %eax holds member's pointer?
       }
       // %eax should hold pointer to identifier_1
       VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-      // std::cout << " mov 8(%eax), %eax" << std::endl;
       int offset2 = findOffset(this->classTable, node->identifier_2->name, tempVariableInfo.type.objectClassName);
       // can u one-line the following two lines
-      std::cout << " mov " << offset2 << "(%eax), %eax" << std::endl;
-      std::cout << " mov %ecx, %eax" << std::endl;
+
+      std::cout << " pop " << offset2 << "(%eax)" << std::endl;
+      // std::cout << " mov " << offset2 << "(%eax), %eax" << std::endl;
+      // std::cout << " pop %eax" << std::endl;
         
       } else { // local or member
-        // std::cout << " push 8(%ebp)" << std::endl;
         if (isLocal(node->identifier_1->name, this->currentMethodInfo)) { // local --> DEFINITELY WORKS
             int offset = findOffset(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
-            std::cout << " mov %ecx, " << offset << "(%ebp)" << std::endl;
+            std::cout << " pop " << offset << "(%ebp)" << std::endl;
             // does not work idk why: access(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);      
         } else { // member
             
             // taken from variable:
             int memberOffset = findOffset(this->classTable, node->identifier_1->name, this->currentClassName);
-            std::cout << "   mov " << "8(%ebp), %eax" << std::endl; 
-            std::cout << "   mov " << memberOffset << "(%eax), %eax" << std::endl;
-            std::cout << "   mov %ecx, %eax" << std::endl;
+            std::cout << " mov " << "8(%ebp), %eax" << std::endl; 
+
+            std::cout << " pop " << memberOffset << "(%eax)" << std::endl;
+            // std::cout << "   mov " << memberOffset << "(%eax), %eax" << std::endl;
+            // std::cout << "   pop %eax" << std::endl;
         }
     }
     // */
@@ -498,7 +509,7 @@ void CodeGenerator::visitDoWhileNode(DoWhileNode* node) {
     node->expression->accept(this);
 
   std::cout << "  pop %eax" << std::endl; //reg1 (check)
-  std::cout << "  cmp $0, $eax" << std::endl; //comparison statement at beginning of while loop
+  std::cout << "  cmp $0, %eax" << std::endl; //comparison statement at beginning of while loop
   std::cout << " jne " << do_whileLabel << std::endl;
   //std::cout << after_whileLabel << std::endl;
 }
@@ -718,7 +729,7 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
   std::cout << "#### MEMBER ACCESS NODE" << std::endl;
 
   int offset1;
-  if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member (17.good.lang)
+  if (isLocal(node->identifier_1->name, this->currentMethodInfo)) // local.member  <== I THINK THIS WORKS
   {
     offset1 = ((currentMethodInfo.variables)->at(node->identifier_1->name)).offset;
     std::cout << " mov " << offset1 << "(%ebp), %eax" << std::endl;
@@ -735,8 +746,7 @@ void CodeGenerator::visitMemberAccessNode(MemberAccessNode* node) {
   VariableInfo tempVariableInfo = findVariableInfo(node->identifier_1->name, this->currentMethodInfo, this->currentClassName, this->classTable);
   int offset2 = findOffset(this->classTable, node->identifier_2->name, tempVariableInfo.type.objectClassName);
   // can u one-line the following two lines
-  std::cout << " mov " << offset2 << "(%eax), %eax" << std::endl;
-  std::cout << " push %eax" << std::endl;
+  std::cout << " push " << offset2 << "(%eax)" << std::endl;
 
 }
 
@@ -807,16 +817,16 @@ void CodeGenerator::visitNewNode(NewNode* node) {
   // ^ i think %eax is the self pointer that i can use when calling constructor?
 
   // check constructor exists
-  MethodTable* currentMethodTable = currentClassInfo.methods;
-  if (currentMethodTable->find(objectTypeName) != currentMethodTable->end()) {
-    // 2. call constructor
+  int i = 0;
+  if (constructor_exists(this->classTable, objectTypeName)) {  
+      // 2. call constructor
     std::cout << "#### NEW NODE (2): constructor call - pre-call sequence" << std::endl;
     // (1) save caller registers
     std::cout << " push %eax" << std::endl;
     std::cout << " push %ecx" << std::endl;
     std::cout << " push %edx" << std::endl;
 
-    int i = 12;
+    i += 12;
     // (2) push arguments + self pointer on the stack
     // reference: https://piazza.com/class/l189pz66aj36k8?cid=343
     if(node->expression_list){
@@ -835,15 +845,9 @@ void CodeGenerator::visitNewNode(NewNode* node) {
 
 
     std::cout << "#### NEW CALL NODE (3): constructor call - post-return sequence" << std::endl;
-    if(node->expression_list){
-      for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
-        // visitExpressionNode((*it), this);
-        std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
-        // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
-      }
-    }
-    // std::cout << " move %eax, %ebx" << std::endl; // store return value in %ebx
-    // no return value
+    int arg_size = 4 + (i-12);                                                                                                                                                                                
+    std::cout << " add $" << arg_size << ", %esp" << std::endl;                                                                                                                                               
+  
 
     // restore caller-save
     std::cout << " pop %edx" << std::endl;
