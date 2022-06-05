@@ -1,106 +1,11 @@
+	
+# visits object type node: classA
 # PROGRAM NODE
  .data
 printstr: .asciz "%d\n"
 
  .text
  .globl Main_main
-#### METHOD NODE (1): method prologue
-classA_f0:
- push %ebp
-o mov %esp, %ebp
- sub $0, %esp
- push %ebx
- push %esi
- push %edi
-#### METHOD NODE (2): method body (visit children)
-#RETURN_STATEMENT
-#### METHOD NODE (3): method epilogue
- pop %edi
- pop %esi
- pop %ebx
- mov %ebp, %esp
- pop %ebp
- ret
-#### METHOD NODE (1): method prologue
-classA_doAll:
- push %ebp
- mov %esp, %ebp
- sub $8, %esp
- push %ebx
- push %esi
- push %edi
-#### METHOD NODE (2): method body (visit children)
-# ASSIGNMENT
- #INTEGER_LITERAL
- push $1
-# offset is: -4
-# ASSIGNMENT
-  pop %eax
- mov %eax, -4(%ebp)
-# ASSIGNMENT
- #INTEGER_LITERAL
- push $2
-# offset is: -8
-# ASSIGNMENT
-  pop %eax
- mov %eax, -8(%ebp)
-# PRINT
-#### METHOD CALL NODE (1): pre-call sequence
- push %eax
- push %ecx
- push %edx
- #INTEGER_LITERAL
- push $5
- push 8(%ebp)
-#### METHOD CALL NODE (2): call instruction
- call classA_f0
-#### METHOD CALL NODE (3): post-return sequence
- pop %ecx
- mov %eax, %ebx
- pop %edx
- pop %ecx
- pop %eax
- push $printstr
- call printf
-# PRINT
-#### METHOD CALL NODE (1): pre-call sequence
- push %eax
- push %ecx
- push %edx
- #INTEGER_LITERAL
- push $6
- push 8(%ebp)
-#### METHOD CALL NODE (2): call instruction
- call classA_f0
-#### METHOD CALL NODE (3): post-return sequence
- pop %ecx
- mov %eax, %ebx
- pop %edx
- pop %ecx
- pop %eax
- push $printstr
- call printf
-# PRINT
-# VARIABLE
- mov 12(%ebp), %eax
- push %eax
-# VARIABLE
- push %eax
-  # PLUS
-  pop %edx
-  pop %eax
-  add %edx, %eax
-  push %eax
- push $printstr
- call printf
- xor %eax, %eax
-#### METHOD NODE (3): method epilogue
- pop %edi
- pop %esi
- pop %ebx
- mov %ebp, %esp
- pop %ebp
- ret
 #### METHOD NODE (1): method prologue
 Main_main:
  push %ebp
@@ -110,17 +15,59 @@ Main_main:
  push %esi
  push %edi
 #### METHOD NODE (2): method body (visit children)
-#### METHOD CALL NODE (1): pre-call sequence
+#### NEW NODE (1): allocate space
+ push $8
+ call malloc
+ add $4, %esp
  push %eax
- push %ecx
- push %edx
-#### METHOD CALL NODE (2): call instruction
- call classA_doAll
-#### METHOD CALL NODE (3): post-return sequence
- mov %eax, %ebx
- pop %edx
  pop %ecx
- pop %eax
+#### ASSIGNMENT NODE
+ mov %ecx, -4(%ebp)
+ #INTEGER_LITERAL
+ push $5
+ pop %ecx
+#### ASSIGNMENT NODE
+ mov -4(%ebp), %eax
+ mov 8(%eax), %eax
+ mov 0(%eax), %eax
+ mov %ecx, %eax
+ #INTEGER_LITERAL
+ push $6
+ pop %ecx
+#### ASSIGNMENT NODE
+ mov -4(%ebp), %eax
+ mov 8(%eax), %eax
+ mov 4(%eax), %eax
+ mov %ecx, %eax
+# PRINT
+# class_name: 
+ push 0(%eax)
+ push $printstr
+ call printf
+# PRINT
+# class_name: 
+ push 0(%eax)
+ push $printstr
+ call printf
+# PRINT
+# class_name: 
+ push 0(%eax)
+# class_name: 
+ push 0(%eax)
+  # MULTIPLY
+  pop %edx
+  pop %eax
+  imul %edx, %eax
+  push %eax
+ #INTEGER_LITERAL
+ push $1
+  # MINUS
+  pop %edx
+  pop %eax
+  sub %edx, %eax
+  push %eax
+ push $printstr
+ call printf
  xor %eax, %eax
 #### METHOD NODE (3): method epilogue
  pop %edi
