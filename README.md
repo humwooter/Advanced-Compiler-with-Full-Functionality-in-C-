@@ -28,8 +28,8 @@ Our implementation process:
   We then performed the arithmetic operation by using the appropriate x86 instruction. Given the order of the registers we used in our arithmetic instructions, 
   the result of the operation would be put into the eax register. 
   
-2.) 
-MethodCall: 
-Member:
-MemberAccess:
-Assignment: 
+2.) Next we implemented member, memberaccess, and assignment. These were all very similar, so once we implemented MethodCall the rest were straightforward. To implement MethodCall, we followed the 3 step process described in the discussion slides. 
+    - First we implemented the pre call sequence by pushing the save caller registers (eax, ecx, and edx) to the stack. We determined the offset of the method for two cases (1: with only identifier_1 present and 2: with both identifier_1 and identifier_2 present). 
+    - Next we implemented the call instruction by identifying the class name that the method belongs to. 
+    - Lastly we implemented the post-return sequence by removing the method arguments from the stack, and then popping the save caller registers off of      the stack.
+- Implementing these functions proved to be the most challenging part of this project. After this, implementing the rest of the visitor functions were relatively straightforward.
