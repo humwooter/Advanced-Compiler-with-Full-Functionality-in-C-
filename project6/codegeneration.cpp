@@ -680,15 +680,12 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
         std::cout << " push %eax" << std::endl;
       }
     } else {
-      std::cout << " push 8(%ebp)" << std::endl;
-        /*
         if (this->currentClassName != "Main") {
             std::cout << "   mov 8(%ebp), %eax" << std::endl;
             std::cout << "   push %eax" << std::endl;
         } else {
             std::cout << "   add $-4, %esp" << std::endl;
         }
-        */
     }
 
     std::cout << "#### METHOD CALL NODE (2): call instruction" << std::endl;
@@ -704,7 +701,13 @@ void CodeGenerator::visitMethodCallNode(MethodCallNode* node) {
     std::cout << " mov %eax, %ebx" << std::endl; // store return value in %ebx
 
     std::cout << "#### METHOD CALL NODE (3): post-return sequence" << std::endl;
-
+         if(node->expression_list){
+          for(auto it = node->expression_list->rbegin(); it != node->expression_list->rend(); ++it){
+              // visitExpressionNode((*it), this);
+              std::cout << " pop %ecx" << std::endl; // pop arguments to %ecx which will later be overwritten
+              // idk if theres some specific/more standard/legit/efficient way we are supposed to remove the arguments
+        }
+    }
     // std::cout << "  add $" << 4 * (node->expression_list->size() + 1) << ", %esp" << std::endl;
 
     // restore caller-save
